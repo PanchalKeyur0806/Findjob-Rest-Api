@@ -88,3 +88,45 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
     token
   );
 });
+
+// resend the otp
+export const resendOtp = catchAsync(async (req, res, next) => {
+  const { userid } = req.params;
+  if (!userid) {
+    return next(new AppError("please provide usreid in params", 404));
+  }
+
+  // generate new otp
+  const otp = generateOtp();
+
+  if (!otp) {
+    return next(new AppError("Otp is not generated", 404));
+  }
+
+  // save otp to db
+  const user = await User.findById(userid);
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  if (user.isVerified) {
+    return next(new AppError("User is already verified", 400));
+  }
+
+  user.otp = otp;
+  user.otpVerifyTime = Date.now() + 60 * 1000;
+  await user.save();
+
+  // send email to client
+  const subject = "Your otp";
+  const message = `heres your otp ${otp}`;
+
+  //   send email to client
+  sendEmail({
+    subject: subject,
+    message: message,
+    email: user.email,
+  });
+
+  successMessage(res, 200, "success", "otp is sent");
+});
