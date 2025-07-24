@@ -1,0 +1,31 @@
+{
+  "name": "findjobrestapi",
+  "version": "1.0.0",
+  "description": "\"Find job rest api using nodejs, express and mongoDB\"",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "jobrestapi",
+    "findjobs"
+  ],
+  "author": "Keyur Panchal",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.4",
+    "morgan": "^1.10.1",
+    "nodemailer": "^7.0.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "otp-generator": "^4.0.1"
+  }
+}
