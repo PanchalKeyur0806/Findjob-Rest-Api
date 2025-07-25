@@ -21,7 +21,6 @@ export const sendEmail = (options) => {
 
     transporter.sendMail(mailOptions, (err, res) => {
       if (err) console.error("Error occured ", err);
-      else console.log("success");
     });
   } catch (error) {
     console.error("Error while sending email ", error);

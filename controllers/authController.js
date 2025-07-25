@@ -79,6 +79,9 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
   // generate the token
   const token = signToken(findOtp._id);
 
+  // set token to cookie
+  res.cookie("token", token);
+
   successMessage(
     res,
     201,
@@ -129,4 +132,31 @@ export const resendOtp = catchAsync(async (req, res, next) => {
   });
 
   successMessage(res, 200, "success", "otp is sent");
+});
+
+// logout functionality
+export const logout = catchAsync(async (req, res, next) => {
+  res.clearCookie("token");
+  successMessage(res, 200, "success", "user is logged out");
+});
+
+// login functionality
+export const login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  const correctPassword = await user.comparePassword(password, user.password);
+  if (!correctPassword) {
+    return next(new AppError("password does not match", 404));
+  }
+
+  const token = signToken(user._id);
+
+  res.cookie("token", token);
+
+  successMessage(res, 200, "success", "user is logged in", user, token);
 });

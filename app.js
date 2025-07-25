@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
 // routes
 import authRoutes from "./routes/authRoutes.js";
@@ -11,6 +12,7 @@ const app = express();
 
 // middlewares
 app.use(express.json());
+app.use(cookieParser());
 
 // routes for the application
 app.use("/api/auth", authRoutes);
