@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 
 // routes
 import authRoutes from "./routes/authRoutes.js";
+import indexRoutes from "./routes/appRoutes.js";
 import errorHandler from "./controllers/errorHandler.js";
 
 dotenv.config({ path: ".env" });
@@ -16,6 +17,8 @@ app.use(cookieParser());
 
 // routes for the application
 app.use("/api/auth", authRoutes);
+app.use("/", indexRoutes);
+
 app.use(errorHandler);
 
 export default app;
