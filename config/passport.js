@@ -24,6 +24,7 @@ passport.use(
             googleId: profile.id,
             isVerified: true,
             authProvider: "google",
+            roles: "candidate",
           });
         }
 

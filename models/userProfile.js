@@ -36,6 +36,19 @@ const userProfile = mongoose.Schema({
     type: String,
     required: true,
   },
+  experience: [
+    {
+      companyName: { type: String },
+      jobTitle: { type: String },
+      address: { type: String },
+      yearsOfExperience: { type: Number },
+    },
+  ],
+  jobPrefrence: {
+    type: String,
+    enum: ["remote", "hybrid", "location", "full-time", "part-time"],
+    default: "full-time",
+  },
   education: [educatoinSchema],
   skills: [
     {

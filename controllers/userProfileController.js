@@ -6,13 +6,16 @@ import { successMessage } from "../utils/successMessage.js";
 
 export const createUserProfile = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
-  const { user, resumeFile, education, skills } = req.body;
+  const { user, resumeFile, education, skills, experience, jobPrefrence } =
+    req.body;
 
   const userProfile = await UserProfile.create({
     user: userId,
     resumeFile,
     education,
     skills,
+    experience,
+    jobPrefrence,
   });
 
   if (!userProfile) {

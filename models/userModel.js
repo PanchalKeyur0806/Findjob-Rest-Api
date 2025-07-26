@@ -26,6 +26,12 @@ const userSchema = mongoose.Schema({
     enum: ["local", "google"],
     default: "local",
   },
+  roles: {
+    type: String,
+    enum: ["candidate", "recruiter", "admin"],
+    default: "candidate",
+    required: true,
+  },
   otp: {
     type: String,
   },
