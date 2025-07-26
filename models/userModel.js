@@ -33,6 +33,8 @@ const userSchema = mongoose.Schema({
     type: Date,
     default: () => Date.now() + 60 * 1000,
   },
+  passwordResetToken: { type: String },
+  passowrdTokenExpires: { type: Date },
   isVerified: { type: Boolean, default: false },
   googleId: { type: String },
 });

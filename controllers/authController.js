@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import User from "../models/userModel.js";
 
 import AppError from "../utils/AppError.js";
@@ -6,6 +7,7 @@ import { catchAsync } from "../utils/catchAsync.js";
 import { generateOtp } from "../utils/otp-generate.js";
 import { successMessage } from "../utils/successMessage.js";
 import { sendEmail } from "../utils/nodemailer.js";
+import { hostname } from "os";
 
 // sign token
 const signToken = (userId) => {
@@ -159,6 +161,76 @@ export const login = catchAsync(async (req, res, next) => {
   res.cookie("token", token);
 
   successMessage(res, 200, "success", "user is logged in", user, token);
+});
+
+// forgot password functionality
+export const forgotpassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return next(new AppError("please provide email", 404));
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError("Email not found", 404));
+  }
+
+  const resetToken = crypto.randomBytes(12).toString("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // save token to user
+  user.passwordResetToken = hashedToken;
+  user.passowrdTokenExpires = Date.now() + 60 * 1000;
+  await user.save({ saveBeforeValidate: true });
+
+  // send email to client
+  const url = `${req.protocol}://${req.get(
+    "host"
+  )}/api/auth/resetpassword/${resetToken}`;
+  console.log(url);
+
+  sendEmail({
+    email: user.email,
+    subject: "change your password",
+    message: `click this url to change your password ${url}`,
+  });
+
+  successMessage(res, 200, "success", "email send successfully");
+});
+
+export const resetPassword = catchAsync(async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  if (!token) {
+    return next(new AppError("Token not found", 404));
+  }
+  if (!password) {
+    return next(new AppError("password not found", 404));
+  }
+
+  // hashed token
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  // find the user
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passowrdTokenExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new AppError("Token expired", 404));
+  }
+
+  // change the password
+  user.password = password;
+  user.passowrdTokenExpires = undefined;
+  user.passwordResetToken = undefined;
+
+  await user.save({ saveBeforeValidate: true });
+
+  successMessage(res, 200, "success", "password updated");
 });
 
 // google call back
