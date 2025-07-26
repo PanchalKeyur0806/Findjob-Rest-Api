@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 
 // routes
 import authRoutes from "./routes/authRoutes.js";
+import userProfileRoutes from "./routes/userProfile.js";
 import indexRoutes from "./routes/appRoutes.js";
 import errorHandler from "./controllers/errorHandler.js";
 import "./config/passport.js";
@@ -29,10 +30,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-
 // routes for the application
 app.use("/api/auth", authRoutes);
+app.use("/api/userprofile", userProfileRoutes);
 app.use("/", indexRoutes);
 
 app.use(errorHandler);
