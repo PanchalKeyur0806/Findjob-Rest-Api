@@ -14,16 +14,17 @@ const userSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
   },
   phoneNumber: {
     type: Number,
-    required: true,
-    unique: true,
   },
   dateOfBirth: {
     type: Date,
-    required: true,
+  },
+  authProvider: {
+    type: String,
+    enum: ["local", "google"],
+    default: "local",
   },
   otp: {
     type: String,
@@ -33,6 +34,7 @@ const userSchema = mongoose.Schema({
     default: () => Date.now() + 60 * 1000,
   },
   isVerified: { type: Boolean, default: false },
+  googleId: { type: String },
 });
 
 // encrypt the password

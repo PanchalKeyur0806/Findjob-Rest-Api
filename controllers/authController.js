@@ -160,3 +160,11 @@ export const login = catchAsync(async (req, res, next) => {
 
   successMessage(res, 200, "success", "user is logged in", user, token);
 });
+
+// google call back
+export const googleCallback = catchAsync(async (req, res, next) => {
+  const token = signToken(req.user.id);
+
+  res.cookie("token", token);
+  successMessage(res, 200, "success", "Google login successfull", null, token);
+});
