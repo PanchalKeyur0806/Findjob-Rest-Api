@@ -1,0 +1,59 @@
+import { ClaimModel } from "../models/claimModel.js";
+import Company from "../models/companyModel.js";
+
+import AppError from "../utils/AppError.js";
+import { catchAsync } from "../utils/catchAsync.js";
+import { successMessage } from "../utils/successMessage.js";
+
+export const performClaim = catchAsync(async (req, res, next) => {
+  const { companyId } = req.params;
+
+  const { message } = req.body;
+  if (!message) {
+    return next(new AppError("Please enter your message", 404));
+  }
+
+  const userId = req.user.id;
+
+  const company = await Company.findById(companyId);
+  if (!company) {
+    return next(new AppError("company not found", 404));
+  }
+
+  const claim = await ClaimModel.create({
+    user: userId,
+    comapny: company,
+    message: message,
+  });
+  if (!claim) {
+    return next(new AppError("sorry claim is not created", 404));
+  }
+
+  successMessage(
+    res,
+    201,
+    "success",
+    "claim is created, it may take a while to perform this action",
+    claim
+  );
+});
+
+export const getAllClaim = catchAsync(async (req, res, next) => {
+  const claims = await ClaimModel.find();
+  if (claims.length <= 0) {
+    return next(new AppError("Claims not found", 404));
+  }
+
+  successMessage(res, 200, "success", "claims found", claims);
+});
+
+export const getOneClaim = catchAsync(async (req, res, next) => {
+  const { claimId } = req.params;
+
+  const claim = await ClaimModel.findById(claimId);
+  if (!claim) {
+    return next(new AppError("Sorry claim not found", 404));
+  }
+
+  successMessage(res, 200, "success", "claim found", claim);
+});
