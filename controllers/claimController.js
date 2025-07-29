@@ -1,3 +1,4 @@
+import { claimValidator } from "../middlewares/validators/claimValidator.js";
 import { ClaimModel } from "../models/claimModel.js";
 import Company from "../models/companyModel.js";
 
@@ -6,6 +7,11 @@ import { catchAsync } from "../utils/catchAsync.js";
 import { successMessage } from "../utils/successMessage.js";
 
 export const performClaim = catchAsync(async (req, res, next) => {
+  const { error, value } = claimValidator(req.body);
+  if (error) {
+    return next(new AppError(error.details[0].message, 400));
+  }
+
   const { companyId } = req.params;
 
   const { message } = req.body;
