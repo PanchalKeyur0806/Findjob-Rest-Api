@@ -1,3 +1,4 @@
+import { companyValidator } from "../middlewares/validators/companyValidator.js";
 import Company from "../models/companyModel.js";
 
 import AppError from "../utils/AppError.js";
@@ -25,6 +26,11 @@ export const getOneCompany = catchAsync(async (req, res, next) => {
 });
 
 export const createCompanies = catchAsync(async (req, res, next) => {
+  const { error, value } = companyValidator(req.body);
+  if (error) {
+    return next(new AppError(error.details[0].message, 404));
+  }
+
   const { companyName, email, phoneNumber, address, description, website } =
     req.body;
 
