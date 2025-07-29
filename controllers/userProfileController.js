@@ -1,3 +1,4 @@
+import { userValidator } from "../middlewares/validators/userProfileValidator.js";
 import UserProfile from "../models/userProfile.js";
 
 import AppError from "../utils/AppError.js";
@@ -5,6 +6,11 @@ import { catchAsync } from "../utils/catchAsync.js";
 import { successMessage } from "../utils/successMessage.js";
 
 export const createUserProfile = catchAsync(async (req, res, next) => {
+  const { error, value } = userValidator(req.body);
+  if (error) {
+    return next(new AppError(error.details[0].message, 400));
+  }
+
   const userId = req.user.id;
   const { user, resumeFile, education, skills, experience, jobPrefrence } =
     req.body;
