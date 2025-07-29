@@ -8,6 +8,10 @@ import { generateOtp } from "../utils/otp-generate.js";
 import { successMessage } from "../utils/successMessage.js";
 import { sendEmail } from "../utils/nodemailer.js";
 import { hostname } from "os";
+import {
+  authValidator,
+  loginValidator,
+} from "../middlewares/validators/authentication.js";
 
 // sign token
 const signToken = (userId) => {
@@ -17,6 +21,11 @@ const signToken = (userId) => {
 };
 
 export const register = catchAsync(async (req, res, next) => {
+  const { error, value } = authValidator(req.body);
+  if (error) {
+    return next(new AppError(error.details[0].message, 400));
+  }
+
   const { name, email, password, dateOfBirth, phoneNumber } = req.body;
 
   // generate the otp
@@ -144,6 +153,11 @@ export const logout = catchAsync(async (req, res, next) => {
 
 // login functionality
 export const login = catchAsync(async (req, res, next) => {
+  const { error, value } = loginValidator(req.body);
+  if (error) {
+    return next(new AppError(error.details[0].message, 400));
+  }
+
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
