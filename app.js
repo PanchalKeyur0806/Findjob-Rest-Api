@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import userProfileRoutes from "./routes/userProfile.js";
 import companyRoutes from "./routes/companyRoutes.js";
 import claimRoutes from "./routes/claimRoutes.js";
+import jobsRoutes from "./routes/jobRoutes.js";
 import indexRoutes from "./routes/appRoutes.js";
 import errorHandler from "./controllers/errorHandler.js";
 import "./config/passport.js";
@@ -37,6 +38,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/userprofile", userProfileRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/claims", claimRoutes);
+app.use("/api/jobs", jobsRoutes);
 app.use("/", indexRoutes);
 
 app.use(errorHandler);
