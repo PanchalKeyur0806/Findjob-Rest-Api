@@ -58,6 +58,12 @@ const userProfile = mongoose.Schema({
   ],
 });
 
+// fetch user details
+userProfile.pre(/^find/, async function (next) {
+  this.populate({ path: "user", select: "-password" });
+  next();
+});
+
 const UserProfile = mongoose.model("UserProfile", userProfile);
 
 export default UserProfile;
