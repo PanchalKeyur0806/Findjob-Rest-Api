@@ -1,13 +1,14 @@
 import request from "supertest";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it, afterAll, beforeAll } from "vitest";
 
 import app from "../app.js";
 import { connectDB, disconnectDB } from "./setup.js";
 import User from "../models/userModel.js";
+import UserProfile from "../models/userProfile.js";
 
 beforeAll(async () => {
   await connectDB();
-}, 5000);
+});
 
 function expectedBody(res) {
   expect(res.body.data).toMatchObject({
@@ -123,13 +124,8 @@ describe("POST /api/auth/forgotpassword", () => {
   });
 });
 
-describe("DELETE ALL THE USER", () => {
-  it("should delete all dbs", async () => {
-    await User.deleteMany();
-  });
-});
-
 // disconnect database
 afterAll(async () => {
+  await User.deleteMany();
   await disconnectDB();
-}, 5000);
+});
