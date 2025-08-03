@@ -34,6 +34,7 @@ describe("POST /api/auth/register route", () => {
       password: "test1234",
       dateOfBirth: "2025-7-18",
       phoneNumber: 9106450963,
+      roles: "candidate",
     });
 
     const res = await request(app)

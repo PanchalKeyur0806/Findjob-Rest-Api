@@ -7,6 +7,7 @@ const authenticationSchema = Joi.object({
   password: Joi.string().min(8).max(16).required(),
   phoneNumber: Joi.number().min(10).required(),
   dateOfBirth: Joi.date().required(),
+  roles: Joi.string().trim().required(),
 });
 
 const loginSchema = Joi.object({

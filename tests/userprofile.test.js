@@ -18,7 +18,7 @@ beforeAll(async () => {
   await User.deleteMany();
   await UserProfile.deleteMany();
 
-  const login = await loginHelper();
+  const login = await loginHelper("candidate");
   cookie = login.cookie;
   token = login.token;
 

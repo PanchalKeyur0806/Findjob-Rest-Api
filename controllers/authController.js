@@ -26,7 +26,7 @@ export const register = catchAsync(async (req, res, next) => {
     return next(new AppError(error.details[0].message, 400));
   }
 
-  const { name, email, password, dateOfBirth, phoneNumber } = req.body;
+  const { name, email, password, dateOfBirth, phoneNumber, roles } = req.body;
 
   // generate the otp
   const generatedOtp = generateOtp();
@@ -39,6 +39,7 @@ export const register = catchAsync(async (req, res, next) => {
     dateOfBirth,
     phoneNumber,
     otp: generatedOtp,
+    roles: process.env.NODE_ENV === "test" ? roles : "candidate",
   });
   if (!user) {
     return next(new AppError("User not created", 404));
