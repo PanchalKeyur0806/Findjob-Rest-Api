@@ -6,6 +6,9 @@ import { connectDB, disconnectDB } from "./setup.js";
 import User from "../models/userModel.js";
 import UserProfile from "../models/userProfile.js";
 
+let random = Math.floor(Math.random() * 10000);
+let email = `panchalkeyur${random}@gmail.com`;
+
 beforeAll(async () => {
   await connectDB();
 });
@@ -30,7 +33,7 @@ describe("POST /api/auth/register route", () => {
   it("should register a user and verify otp", async () => {
     await request(app).post("/api/auth/register").send({
       name: "Keyur Panchal",
-      email: "panchalkeyur694@gmail.com",
+      email: email,
       password: "test1234",
       dateOfBirth: "2025-7-18",
       phoneNumber: 9106450963,
@@ -74,12 +77,12 @@ describe("POST /api/auth/register route", () => {
 describe("POST /api/auth/login", () => {
   // success test
   it("login user", async () => {
-    const user = await User.findOne({ email: "panchalkeyur694@gmail.com" });
-    expect(user.email).toBe("panchalkeyur694@gmail.com");
+    const user = await User.findOne({ email: email });
+    expect(user.email).toBe(email);
 
     const res = await request(app)
       .post("/api/auth/login")
-      .send({ email: "panchalkeyur694@gmail.com", password: "test1234" });
+      .send({ email: email, password: "test1234" });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.status).toBe("success");
@@ -109,7 +112,7 @@ describe("POST /api/auth/forgotpassword", () => {
   it("forgotpassword password ", async () => {
     const res = await request(app)
       .post("/api/auth/forgotpassword")
-      .send({ email: "panchalkeyur694@gmail.com" });
+      .send({ email: email });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.status).toBe("success");

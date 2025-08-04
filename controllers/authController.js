@@ -50,11 +50,13 @@ export const register = catchAsync(async (req, res, next) => {
   const message = `heres your otp ${generatedOtp}`;
 
   //   send email to client
-  sendEmail({
-    subject: subject,
-    message: message,
-    email: email,
-  });
+  if (process.env.NODE_ENV !== "test") {
+    sendEmail({
+      subject: subject,
+      message: message,
+      email: email,
+    });
+  }
 
   //   send success message to user
   successMessage(res, 201, "success", "email sent successfully");

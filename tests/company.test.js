@@ -105,8 +105,6 @@ describe("PATCH /api/company/:companyId", () => {
       .set("Cookie", cookie)
       .send({ companyName: "Googe Auth" });
 
-    console.log(res.body);
-
     expect(res.statusCode).toBe(200);
     expect(res.body.status).toBe("success");
     expect(res.body).toHaveProperty("message");
@@ -130,7 +128,6 @@ describe("DELETE /api/company/:companyId", () => {
       .set("Cookie", cookie)
       .send({ companyName: "Googe Auth" });
 
-    console.log(res.body);
 
     expect(res.statusCode).toBe(204);
   });

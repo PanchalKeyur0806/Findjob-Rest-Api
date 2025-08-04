@@ -3,10 +3,13 @@ import jwt from "jsonwebtoken";
 
 import app from "../../app.js";
 
+let random = Math.floor(Math.random() * 10000);
+let email = `testuser${random}@gmail.com`;
+
 export async function loginHelper(role) {
   const userplayload = await request(app).post("/api/auth/register").send({
     name: "Keyur Panchal",
-    email: "panchalkeyur694@gmail.com",
+    email: email,
     password: "test1234",
     dateOfBirth: "2025-7-18",
     phoneNumber: 9106450963,
@@ -16,7 +19,7 @@ export async function loginHelper(role) {
   await request(app).post("/api/auth/verifyotp").send({ otp: "123456" });
 
   const res = await request(app).post("/api/auth/login").send({
-    email: "panchalkeyur694@gmail.com",
+    email: email,
     password: "test1234",
   });
 
