@@ -28,7 +28,7 @@ export const performClaim = catchAsync(async (req, res, next) => {
 
   const claim = await ClaimModel.create({
     user: userId,
-    comapny: company,
+    company: company,
     message: message,
   });
   if (!claim) {

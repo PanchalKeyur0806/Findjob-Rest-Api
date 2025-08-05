@@ -3,10 +3,10 @@ import jwt from "jsonwebtoken";
 
 import app from "../../app.js";
 
-let random = Math.floor(Math.random() * 10000);
-let email = `testuser${random}@gmail.com`;
-
 export async function loginHelper(role) {
+  let random = Math.floor(Math.random() * 10000);
+  let email = `testuser${random}@gmail.com`;
+
   const userplayload = await request(app).post("/api/auth/register").send({
     name: "Keyur Panchal",
     email: email,
