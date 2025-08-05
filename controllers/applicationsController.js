@@ -48,7 +48,7 @@ export const viewApplication = catchAsync(async (req, res, next) => {
     return next(new AppError("Application not found", 404));
   }
 
-  successMessage(res, 201, "success", "application found", findApplication);
+  successMessage(res, 200, "success", "application found", findApplication);
 });
 
 // retrive application

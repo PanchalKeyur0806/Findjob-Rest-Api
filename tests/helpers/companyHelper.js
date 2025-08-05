@@ -5,6 +5,10 @@ import { loginHelper } from "./loginHelpers.js";
 import User from "../../models/userModel.js";
 
 export async function companyHelper(role) {
+  let random = Math.floor(Math.random() * 10000);
+  let randomNumber = Math.floor(1000000000 + Math.random() * 9000000000);
+  let email = `google${random}@gmail.com`;
+
   const login = await loginHelper(role);
   const cookie = login.cookie;
   const token = login.token;
@@ -18,8 +22,8 @@ export async function companyHelper(role) {
     .set("Cookie", cookie)
     .send({
       companyName: "Google",
-      email: "google@gmail.com",
-      phoneNumber: 9100000000,
+      email: email,
+      phoneNumber: randomNumber,
       address: "somewhere on earth",
       description: "Google is best company in the world",
       website: "google.com",

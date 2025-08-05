@@ -22,8 +22,8 @@ routes.post(
   submitApplication
 );
 
-routes.get("/user/view/:applciationId", viewApplication);
-routes.delete("/user/retrive/:applciationId", retriveApplication);
+routes.get("/user/view/:applciationId", protect, viewApplication);
+routes.delete("/user/retrive/:applciationId", protect, retriveApplication);
 
 // recruiter routes
 
