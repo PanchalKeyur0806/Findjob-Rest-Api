@@ -1,5 +1,7 @@
+import fs from "fs";
 import { userValidator } from "../middlewares/validators/userProfileValidator.js";
 import UserProfile from "../models/userProfile.js";
+import { uploadFile } from "../utils/cloudinary.js";
 
 import AppError from "../utils/AppError.js";
 import { catchAsync } from "../utils/catchAsync.js";
@@ -11,13 +13,23 @@ export const createUserProfile = catchAsync(async (req, res, next) => {
     return next(new AppError(error.details[0].message, 400));
   }
 
+  const file = req.file;
+  if (!file) return next(new AppError("file not found", 404));
+
   const userId = req.user.id;
-  const { user, resumeFile, education, skills, experience, jobPrefrence } =
-    req.body;
+  const { resumeFile, education, skills, experience, jobPrefrence } = req.body;
+
+  // uploading the file
+  const cloudinaryResponse = await uploadFile(file.path);
+
+  // remove the file after being uploadeds
+  if (req.file && req.file.path) {
+    fs.unlinkSync(file.path);
+  }
 
   const userProfile = await UserProfile.create({
     user: userId,
-    resumeFile,
+    resumeFile: cloudinaryResponse.secure_url,
     education,
     skills,
     experience,

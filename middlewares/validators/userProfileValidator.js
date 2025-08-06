@@ -2,7 +2,6 @@ import Joi from "joi";
 import { validator } from "./boilerplatofValidators.js";
 
 const userProfileValidator = Joi.object({
-  resumeFile: Joi.string().required(),
   experience: Joi.array().items(
     Joi.object({
       companyName: Joi.string().required(),

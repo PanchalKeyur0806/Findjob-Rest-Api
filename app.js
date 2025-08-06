@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import passport from "passport";
 import session from "express-session";
 import cookieParser from "cookie-parser";
+import { fileURLToPath } from "url";
+import path from "path";
 
 // routes
 import authRoutes from "./routes/authRoutes.js";
@@ -17,9 +19,13 @@ import "./config/passport.js";
 
 dotenv.config({ path: ".env" });
 
+const _filename = fileURLToPath(import.meta.url);
+const _dirname = path.dirname(_filename);
+
 const app = express();
 
 // middlewares
+app.use(express.static(path.join(_dirname, "/public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
