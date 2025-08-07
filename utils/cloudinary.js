@@ -11,10 +11,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const uploadFile = async (localfile) => {
+export const uploadFile = async (localfile, path="") => {
   try {
     if (!localfile) return next(new AppError("localpath not found"));
-    const respose = await cloudinary.uploader.upload(localfile);
+    const respose = await cloudinary.uploader.upload(localfile, path);
 
     return respose;
   } catch (error) {

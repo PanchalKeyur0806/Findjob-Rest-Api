@@ -1,9 +1,11 @@
+import fs from "fs";
 import { companyValidator } from "../middlewares/validators/companyValidator.js";
 import Company from "../models/companyModel.js";
 
 import AppError from "../utils/AppError.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import { successMessage } from "../utils/successMessage.js";
+import { uploadFile } from "../utils/cloudinary.js";
 
 export const getComapanies = catchAsync(async (req, res, next) => {
   const companies = await Company.find();
@@ -31,11 +33,35 @@ export const createCompanies = catchAsync(async (req, res, next) => {
     return next(new AppError(error.details[0].message, 404));
   }
 
-  const { companyName, email, phoneNumber, address, description, website } =
-    req.body;
+  if (!req.file || !req.file.path) {
+    return next(new AppError("File not found", 404));
+  }
+  const file = req.file.path;
+
+  const {
+    companyName,
+    email,
+    phoneNumber,
+    address,
+    description,
+    website,
+    companyLogo,
+  } = req.body;
+
+  // uplod images to cloudinary
+  const cloudinaryResponse = await uploadFile(file);
+  if (!cloudinaryResponse) {
+    return next(new AppError("Failed to upload image", 400));
+  }
+
+  // unlink file from the dir
+  if (file) {
+    fs.unlinkSync(file);
+  }
 
   const company = await Company.create({
     companyName,
+    companyLogo: cloudinaryResponse.url,
     email,
     phoneNumber,
     address,

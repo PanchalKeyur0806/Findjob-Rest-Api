@@ -8,6 +8,7 @@ const companyValidationSchema = Joi.object({
   address: Joi.string().trim().required().min(10).required(),
   description: Joi.string().trim().min(20).required(),
   website: Joi.string().trim().required(),
+  companyLogo: Joi.string().trim(),
 });
 
 export const companyValidator = validator(companyValidationSchema);

@@ -20,7 +20,7 @@ export const createUserProfile = catchAsync(async (req, res, next) => {
   const { resumeFile, education, skills, experience, jobPrefrence } = req.body;
 
   // uploading the file
-  const cloudinaryResponse = await uploadFile(file.path);
+  const cloudinaryResponse = await uploadFile(file.path, "userResume/");
 
   // remove the file after being uploadeds
   if (req.file && req.file.path) {
@@ -29,7 +29,7 @@ export const createUserProfile = catchAsync(async (req, res, next) => {
 
   const userProfile = await UserProfile.create({
     user: userId,
-    resumeFile: cloudinaryResponse.secure_url,
+    resumeFile: cloudinaryResponse.url,
     education,
     skills,
     experience,
