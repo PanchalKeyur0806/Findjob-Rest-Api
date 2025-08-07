@@ -18,6 +18,7 @@ export const uploadFile = async (localfile) => {
 
     return respose;
   } catch (error) {
+    fs.unlinkSync(localfile);
     console.log(error);
   }
 };
