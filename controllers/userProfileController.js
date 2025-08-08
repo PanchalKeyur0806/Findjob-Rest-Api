@@ -20,7 +20,10 @@ export const createUserProfile = catchAsync(async (req, res, next) => {
   const { resumeFile, education, skills, experience, jobPrefrence } = req.body;
 
   // uploading the file
-  const cloudinaryResponse = await uploadFile(file.path, "userResume/");
+  const cloudinaryResponse = await uploadFile(
+    file.path,
+    "/jobfinder/userResume"
+  );
 
   // remove the file after being uploadeds
   if (req.file && req.file.path) {

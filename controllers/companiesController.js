@@ -49,7 +49,7 @@ export const createCompanies = catchAsync(async (req, res, next) => {
   } = req.body;
 
   // uplod images to cloudinary
-  const cloudinaryResponse = await uploadFile(file);
+  const cloudinaryResponse = await uploadFile(file, "/jobfinder/companyLogo");
   if (!cloudinaryResponse) {
     return next(new AppError("Failed to upload image", 400));
   }
