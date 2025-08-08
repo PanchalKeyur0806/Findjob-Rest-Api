@@ -22,6 +22,6 @@ const userProfileValidator = Joi.object({
     })
   ),
   skills: Joi.array().items(Joi.string().required().trim()),
-});
+}).unknown(true);
 
 export const userValidator = validator(userProfileValidator);

@@ -19,9 +19,12 @@ let usercookie;
 beforeAll(async () => {
   await connectDB();
   const userprofilelogin = await userProfileHelper();
+  console.log("user profile cookie ", userprofilelogin.usercookie);
+
   const jobidlogin = await jobHelper();
 
   usercookie = userprofilelogin.usercookie;
+
   jobId = jobidlogin.jobId;
 });
 

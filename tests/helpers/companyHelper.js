@@ -1,8 +1,14 @@
+import { fileURLToPath } from "url";
+import path from "path";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 import app from "../../app.js";
 import { loginHelper } from "./loginHelpers.js";
 import User from "../../models/userModel.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const img = path.join(__dirname + "\\.." + "\\assets" + "\\test-img.png");
 
 export async function companyHelper(role) {
   let random = Math.floor(Math.random() * 10000);
@@ -19,15 +25,15 @@ export async function companyHelper(role) {
 
   const res = await request(app)
     .post("/api/company")
+    .set("Content-Type", "multipart/form-data")
     .set("Cookie", cookie)
-    .send({
-      companyName: "Google",
-      email: email,
-      phoneNumber: randomNumber,
-      address: "somewhere on earth",
-      description: "Google is best company in the world",
-      website: "google.com",
-    });
+    .field("companyName", "Goolge")
+    .field("email", `${email}`)
+    .field("phoneNumber", `${randomNumber}`)
+    .field("address", "Google is best company in the world")
+    .field("description", "Google is best company in the world")
+    .field("website", "http://www.google.com")
+    .attach("companyLogo", img);
 
   const companyId = res.body?.data?._id;
 

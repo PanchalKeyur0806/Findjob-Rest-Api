@@ -1,3 +1,5 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import request from "supertest";
 import { describe, it, expect, beforeEach, afterAll, beforeAll } from "vitest";
 import jwt from "jsonwebtoken";
@@ -12,6 +14,11 @@ let cookie;
 let token;
 let userId;
 let userProfileId;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const img = path.join(__dirname + "\\assets" + "\\test-img.png");
+
 beforeAll(async () => {
   await connectDB();
 
@@ -26,6 +33,30 @@ beforeAll(async () => {
   userId = decoded.id;
 });
 
+// create userprofile
+async function createUserProfile() {
+  const res = await request(app)
+    .post("/api/userprofile/")
+    .set("Content-Type", "multipart/form-data")
+    .set("Cookie", cookie)
+    .field("jobPrefrence", "remote")
+    .field("skills[]", "HTML")
+    .field("skills[]", "CSS")
+    .field("experience[0][companyName]", "Maxgen")
+    .field("experience[0][jobTitle]", "Node.js Developer")
+    .field("experience[0][address]", "Some where on the earth")
+    .field("experience[0][yearsOfExperience]", "5")
+    .field("education[0][name]", "5")
+    .field("education[0][place]", "Vastral")
+    .field("education[0][score]", "50.90")
+    .field("education[0][joiningDate]", "2026-08-06")
+    .field("education[0][endingDate]", "2026-08-06")
+    .attach("resumeFile", img);
+
+  return res;
+}
+
+// expected response
 function expectedBody(res) {
   expect(res.body.data).toMatchObject({
     resumeFile: expect.any(String),
@@ -51,133 +82,115 @@ function expectedBody(res) {
   });
 }
 
-// post the user profile
-describe("POST /api/userprofile/", () => {
-  it("should submit the user profile", async () => {
-    const res = await request(app)
-      .post("/api/userprofile/")
-      .set("Cookie", cookie)
-      .send({
-        resumeFile: "some",
-        experience: [
-          {
-            companyName: "Google",
-            jobTitle: "Node.js Developer",
-            address: "mars",
-            yearsOfExperience: 3,
-          },
-        ],
-        jobPrefrence: "remote",
-        education: [
-          {
-            name: "abc",
-            place: "abc",
-            score: 99,
-            joiningDate: "2025-07-18",
-            endingDate: "2025-07-18",
-          },
-        ],
-        skills: ["html", "css", "javascript"],
-      });
+describe("User Profile API", () => {
+  // post the user profile
+  describe("POST /api/userprofile/", () => {
+    it("should submit the user profile", async () => {
+      const res = await createUserProfile();
 
-    expect(res.statusCode).toBe(201);
-    expect(res.body.status).toBe("success");
-    expect(res.body).toHaveProperty("message", "userProfile created");
-    expectedBody(res);
+      expect(res.statusCode).toBe(201);
+      expect(res.body.status).toBe("success");
+      expect(res.body).toHaveProperty("message", "userProfile created");
+      expectedBody(res);
+    }, 15000);
+
+    it("should return error (missing required fields)", async () => {
+      const res = await request(app)
+        .post("/api/userprofile/")
+        .set("Content-Type", "multipart/form-data")
+        .set("Cookie", cookie)
+        .field("skills[]", "HTML")
+        .field("skills[]", "CSS")
+        .field("experience[0][jobTitle]", "Node.js Developer")
+        .field("experience[0][address]", "Some where on the earth")
+        .field("experience[0][yearsOfExperience]", "5")
+        .field("education[0][name]", "5")
+        .field("education[0][place]", "Vastral")
+        .field("education[0][score]", "50.90")
+        .field("education[0][joiningDate]", "2026-08-06")
+        .field("education[0][endingDate]", "2026-08-06");
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.status).toBe("Error");
+      expect(res.body).toHaveProperty("message");
+    });
   });
 
-  it("should return error (missing required fields)", async () => {
-    const res = await request(app)
-      .post("/api/userprofile")
-      .send({
-        resumeFile: "some",
-        experience: [
-          {
-            companyName: "Google",
-            jobTitle: "Node.js Developer",
-            address: "mars",
-            yearsOfExperience: 3,
-          },
-        ],
-        education: [
-          {
-            name: "abc",
-            place: "abc",
-            score: 99,
-            joiningDate: "2025-07-18",
-            endingDate: "2025-07-18",
-          },
-        ],
-        skills: ["html", "css", "javascript"],
-      });
+  // get the user profile
+  describe("GET /api/userprofile", () => {
+    // success message
+    it("should return success", async () => {
+      const res = await request(app)
+        .get("/api/userprofile")
+        .set("Cookie", cookie);
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body.status).toBe("Error");
-    expect(res.body).toHaveProperty("message");
-  });
-});
+      expect(res.statusCode).toBe(200);
+      expect(res.body.status).toBe("success");
+      expect(res.body).toHaveProperty("message", "user profile found");
+      expectedBody(res);
+      expect(typeof res.body.status).toBe("string");
+    });
 
-// get the user profile
-describe("GET /api/userprofile", () => {
-  // success message
-  it("should return success", async () => {
-    const res = await request(app)
-      .get("/api/userprofile")
-      .set("Cookie", cookie);
+    //   error success
+    it("should return error message", async () => {
+      const res = await request(app).get("/api/userprofile");
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.status).toBe("success");
-    expect(res.body).toHaveProperty("message", "user profile found");
-    expectedBody(res);
-    expect(typeof res.body.status).toBe("string");
+      expect(res.statusCode).toBe(400);
+      expect(res.body.status).toBe("Error");
+      expect(res.body).toHaveProperty("message");
+      expect(typeof res.body.status).toBe("string");
+    });
   });
 
-  //   error success
-  it("should return error message", async () => {
-    const res = await request(app).get("/api/userprofile");
+  // update the userprofile
+  describe("PATCH /api/userprofile/:profile", () => {
+    // success message
+    it("should return success message", async () => {
+      await UserProfile.deleteMany();
+      const createUserprofile = await createUserProfile();
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body.status).toBe("Error");
-    expect(res.body).toHaveProperty("message");
-    expect(typeof res.body.status).toBe("string");
-  });
-});
+      console.log(createUserprofile.body);
 
-// update the userprofile
-describe("PATCH /api/userprofile/:profile", () => {
-  // success message
-  it("should return success message", async () => {
-    if (!userProfileId) {
-      const existingProfile = await UserProfile.findOne({ resumeFile: "some" });
-      userProfileId = existingProfile._id;
-    }
+      expect(createUserprofile.statusCode).toBe(201);
+      expect(createUserprofile.body.status).toBe("success");
+      expect(createUserprofile.body).toHaveProperty(
+        "message",
+        "userProfile created"
+      );
+      expectedBody(createUserprofile);
 
-    expect(userProfileId).toBeDefined();
+      if (!userProfileId) {
+        userProfileId = createUserprofile.body.data._id;
+      }
 
-    const res = await request(app)
-      .patch(`/api/userprofile/${userProfileId}`)
-      .set("Cookie", cookie)
-      .send({ skills: ["html", "css"] });
+      expect(userProfileId).toBeDefined();
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.status).toBe("success");
-    expect(res.body).toHaveProperty("message");
-    expect(res.body.message).toBe("user Profile updated");
-    expect(typeof res.body.status).toBe("string");
-  });
+      const res = await request(app)
+        .patch(`/api/userprofile/${userProfileId}`)
+        .set("Cookie", cookie)
+        .send({ skills: ["html", "css"] });
 
-  // error message
-  it("should return error message", async () => {
-    const profile = await UserProfile.findOne({ resumeFile: "some" });
-    const res = await request(app)
-      .patch(`/api/userprofile/${userProfileId}`)
-      .send({ skills: ["html", "css"] });
+      console.log(res.body);
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body.status).toBe("Error");
+      expect(res.statusCode).toBe(200);
+      expect(res.body.status).toBe("success");
+      expect(res.body).toHaveProperty("message");
+      expect(res.body.message).toBe("user Profile updated");
+      expect(typeof res.body.status).toBe("string");
+    });
 
-    expect(typeof res.body.status).toBe("string");
-    expect(typeof res.body.message).toBe("string");
+    // error message
+    it("should return error message", async () => {
+      const res = await request(app)
+        .patch(`/api/userprofile/${userProfileId}`)
+        .send({ skills: ["html", "css"] });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.status).toBe("Error");
+
+      expect(typeof res.body.status).toBe("string");
+      expect(typeof res.body.message).toBe("string");
+    });
   });
 });
 

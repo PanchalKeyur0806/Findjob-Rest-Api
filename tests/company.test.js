@@ -1,3 +1,5 @@
+import { fileURLToPath } from "url";
+import path from "path";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect } from "vitest";
 import jwt from "jsonwebtoken";
@@ -12,6 +14,10 @@ let cookie;
 let token;
 let companyId;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const img = path.join(__dirname, "\\assets", "\\test-img.png");
+
 beforeAll(async () => {
   await connectDB();
 
@@ -21,6 +27,24 @@ beforeAll(async () => {
   token = login.token;
 });
 
+// return res
+async function returnRes() {
+  const res = await request(app)
+    .post("/api/company")
+    .set("Content-Type", "multipart/form-data")
+    .set("Cookie", cookie)
+    .field("companyName", "Goolge")
+    .field("email", "Google@gmail.com")
+    .field("phoneNumber", "1234567890")
+    .field("address", "Google is best company in the world")
+    .field("description", "Google is best company in the world")
+    .field("website", "http://www.google.com")
+    .attach("companyLogo", img);
+
+  return res;
+}
+
+// expected outputs
 function expectedBody(res) {
   expect(res.body.data).toMatchObject({
     companyName: expect.any(String),
@@ -34,17 +58,7 @@ function expectedBody(res) {
 
 describe("POST /api/company/", () => {
   it("should create a new company", async () => {
-    const res = await request(app)
-      .post("/api/company")
-      .set("Cookie", cookie)
-      .send({
-        companyName: "Google",
-        email: "google@gmail.com",
-        phoneNumber: 9100000000,
-        address: "somewhere on earth",
-        description: "Google is best company in the world",
-        website: "google.com",
-      });
+    const res = await returnRes();
 
     expect(res.statusCode).toBe(201);
     expect(res.body.status).toBe("success");
@@ -55,17 +69,7 @@ describe("POST /api/company/", () => {
   });
 
   it("should return an error", async () => {
-    const res = await request(app)
-      .post("/api/company")
-      .set("Cookie", cookie)
-      .send({
-        companyName: "Google",
-        phoneNumber: 9100000000,
-        address: "somewhere on earth",
-        description: "Google is best company in the world",
-        website: "google.com",
-      });
-
+    const res = await returnRes();
     expect(res.statusCode).toBe(400);
     expect(res.body.status).toBe("Error");
     expect(res.body).toHaveProperty("message");
@@ -74,10 +78,13 @@ describe("POST /api/company/", () => {
 
 describe("GET /api/company/:companyId", () => {
   it("should return true", async () => {
+    await Company.deleteMany();
+    const creteCompany = await returnRes();
+
     if (!companyId) {
-      const company = await Company.findOne({ companyName: "Google" });
-      companyId = company._id;
+      companyId = creteCompany.body.data._id;
     }
+
     expect(companyId).toBeDefined();
 
     const res = await request(app).get(`/api/company/${companyId}`);
@@ -93,9 +100,9 @@ describe("GET /api/company/:companyId", () => {
 
 describe("PATCH /api/company/:companyId", () => {
   it("should return true", async () => {
+    const companyCreate = await returnRes();
     if (!companyId) {
-      const company = await Company.findOne({ companyName: "Google" });
-      companyId = company._id;
+      companyId = companyCreate.body.data._id;
     }
 
     expect(companyId).toBeDefined();
@@ -116,9 +123,9 @@ describe("PATCH /api/company/:companyId", () => {
 
 describe("DELETE /api/company/:companyId", () => {
   it("should return true", async () => {
+    const createCompany = await returnRes();
     if (!companyId) {
-      const company = await Company.findOne({ companyName: "Google" });
-      companyId = company._id;
+      companyId = createCompany.body.data._id;
     }
 
     expect(companyId).toBeDefined();
@@ -127,7 +134,6 @@ describe("DELETE /api/company/:companyId", () => {
       .delete(`/api/company/${companyId}`)
       .set("Cookie", cookie)
       .send({ companyName: "Googe Auth" });
-
 
     expect(res.statusCode).toBe(204);
   });
