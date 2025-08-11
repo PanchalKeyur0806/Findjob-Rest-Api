@@ -17,6 +17,14 @@ export async function jobHelper() {
     .post(`/api/jobs/create/company/${companyId}`)
     .set("Cookie", recruitercookie)
     .send({
+      title: "nodejs Developer",
+      employeeType: "parttime",
+      location: "ahmedabad",
+      salary: 3000,
+      applicationDeadline: "2025-06-08",
+      numberOfOpenings: 5,
+      jobCategory: "IT",
+      educationLevel: "BCA",
       responsibility:
         "Manage Backend fronted, develop ai backend, develop game backend and so on so forth",
       requirements: "5 years of experience min 10 years of request required",
@@ -27,7 +35,6 @@ export async function jobHelper() {
     });
 
   jobId = res.body.data._id;
-
 
   return { jobId };
 }

@@ -20,6 +20,14 @@ export const createJobs = catchAsync(async (req, res, next) => {
   const companyId = req.params.companyId;
 
   const {
+    title,
+    employeeType,
+    location,
+    salary,
+    applicationDeadline,
+    numberOfOpenings,
+    jobCategory,
+    educationLevel,
     responsibility,
     requirements,
     niceToHave,
@@ -29,6 +37,14 @@ export const createJobs = catchAsync(async (req, res, next) => {
   } = req.body;
 
   const createJob = await JobModel.create({
+    title,
+    employeeType,
+    location,
+    salary,
+    applicationDeadline,
+    numberOfOpenings,
+    jobCategory,
+    educationLevel,
     user: userId,
     company: companyId,
     responsibility,
@@ -109,10 +125,24 @@ export const deleteJobAdmin = catchAsync(async (req, res, next) => {
 // get one jobs
 export const getOneJob = catchAsync(async (req, res, next) => {
   const { jobId } = req.params;
+  const userId = req.user.id;
 
+  // get the current job
   const job = await JobModel.findById(jobId);
   if (!job) {
     return next(new AppError("Job not found", 404));
   }
+
+  // increase the view viewsCount
+  // check that user id is exists in viewCount array
+  // if yes ignore it
+  // otherwise added it
+  if (!job.viewedBy.some((user) => user.toString() === userId)) {
+    job.viewsCount += 1;
+    job.viewedBy.push(userId);
+
+    await job.save();
+  }
+
   successMessage(res, 200, "success", "job found", job);
 });
