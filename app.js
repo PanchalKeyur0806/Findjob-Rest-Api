@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import passport from "passport";
 import session from "express-session";
 import cookieParser from "cookie-parser";
@@ -25,6 +26,7 @@ const _dirname = path.dirname(_filename);
 const app = express();
 
 // middlewares
+app.use(cors());
 app.use(express.static(path.join(_dirname, "/public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
