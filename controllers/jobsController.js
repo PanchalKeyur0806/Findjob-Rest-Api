@@ -3,6 +3,7 @@ import JobModel from "../models/jobModel.js";
 
 // utils files
 import AppError from "../utils/AppError.js";
+import ApiFeature from "../utils/ApiFeature.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import { successMessage } from "../utils/successMessage.js";
 
@@ -98,7 +99,18 @@ export const deleteJob = catchAsync(async (req, res, next) => {
 
 // get all jobs (admin)
 export const getAllJobs = catchAsync(async (req, res, next) => {
-  const jobs = await JobModel.find();
+  const features = new ApiFeature(JobModel.find(), req.query, [
+    "title",
+    "skills",
+    "location",
+  ])
+    .search()
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const jobs = await features.query;
   if (jobs.length <= 0) {
     return next(new AppError("Jobs not found", 404));
   }

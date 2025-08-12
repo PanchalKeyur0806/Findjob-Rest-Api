@@ -1,4 +1,5 @@
 import Applications from "../models/applicationModel.js";
+import JobModel from "../models/jobModel.js";
 import UserProfile from "../models/userProfile.js";
 
 import AppError from "../utils/AppError.js";
@@ -15,6 +16,12 @@ export const submitApplication = catchAsync(async (req, res, next) => {
   const findUserProfile = await UserProfile.findOne({ user: userId });
   if (!findUserProfile) {
     return next(new AppError("User profile not found", 400));
+  }
+
+  // find the job
+  const findJob = await JobModel.findById(jobId);
+  if (!findJob) {
+    return next(new AppError("Job not found", 404));
   }
 
   // find user application
@@ -35,6 +42,10 @@ export const submitApplication = catchAsync(async (req, res, next) => {
   if (!createApplication) {
     return next(new AppError("Application is not created", 400));
   }
+
+  // increasing application count in Job
+  findJob.applicationCount += 1;
+  await findJob.save();
 
   successMessage(res, 201, "success", "application created", createApplication);
 });

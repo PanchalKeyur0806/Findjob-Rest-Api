@@ -149,8 +149,6 @@ describe("User Profile API", () => {
       await UserProfile.deleteMany();
       const createUserprofile = await createUserProfile();
 
-      console.log(createUserprofile.body);
-
       expect(createUserprofile.statusCode).toBe(201);
       expect(createUserprofile.body.status).toBe("success");
       expect(createUserprofile.body).toHaveProperty(
@@ -169,8 +167,6 @@ describe("User Profile API", () => {
         .patch(`/api/userprofile/${userProfileId}`)
         .set("Cookie", cookie)
         .send({ skills: ["html", "css"] });
-
-      console.log(res.body);
 
       expect(res.statusCode).toBe(200);
       expect(res.body.status).toBe("success");
