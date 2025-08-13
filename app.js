@@ -26,9 +26,10 @@ const _dirname = path.dirname(_filename);
 const app = express();
 
 // middlewares
+console.log(process.env.NODE_ENV === "developmen");
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://findjob-rest-api.onrender.com"],
+    origin: ["http://localhost:5173"],
     credentials: true,
   })
 );
