@@ -254,5 +254,5 @@ export const googleCallback = catchAsync(async (req, res, next) => {
   const token = signToken(req.user.id);
 
   res.cookie("token", token);
-  successMessage(res, 200, "success", "Google login successfull", null, token);
+  res.redirect("http://localhost:5173/");
 });
