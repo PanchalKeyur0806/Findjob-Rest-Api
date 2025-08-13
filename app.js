@@ -26,7 +26,7 @@ const _dirname = path.dirname(_filename);
 const app = express();
 
 // middlewares
-console.log(process.env.NODE_ENV === "developmen");
+console.log(process.env.NODE_ENV === "production");
 app.use(
   cors({
     origin: ["http://localhost:5173"],
