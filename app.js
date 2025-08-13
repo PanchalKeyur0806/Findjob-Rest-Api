@@ -26,7 +26,12 @@ const _dirname = path.dirname(_filename);
 const app = express();
 
 // middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://findjob-rest-api.onrender.com"],
+    credentials: true,
+  })
+);
 app.use(express.static(path.join(_dirname, "/public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

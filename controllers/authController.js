@@ -94,7 +94,12 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
   const token = signToken(findOtp._id);
 
   // set token to cookie
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
 
   successMessage(
     res,
@@ -175,7 +180,12 @@ export const login = catchAsync(async (req, res, next) => {
 
   const token = signToken(user._id);
 
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
 
   successMessage(res, 200, "success", "user is logged in", user, token);
 });
@@ -253,6 +263,11 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 export const googleCallback = catchAsync(async (req, res, next) => {
   const token = signToken(req.user.id);
 
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
   res.redirect("http://localhost:5173/");
 });
