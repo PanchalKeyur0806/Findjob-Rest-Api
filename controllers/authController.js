@@ -96,7 +96,6 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
   // set token to cookie
   res.cookie("token", token, {
     httpOnly: true,
-    secure: true,
     sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000,
   });
@@ -182,7 +181,6 @@ export const login = catchAsync(async (req, res, next) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: true,
     sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000,
   });
@@ -265,7 +263,6 @@ export const googleCallback = catchAsync(async (req, res, next) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: true,
     sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000,
   });
