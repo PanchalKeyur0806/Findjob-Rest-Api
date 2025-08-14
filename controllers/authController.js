@@ -93,21 +93,29 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
   // generate the token
   const token = signToken(findOtp._id);
 
-  // set token to cookie
-  res.cookie("token", token, {
-    httpOnly: false,
-    secure: false,
-    maxAge: 24 * 60 * 60 * 1000,
-  });
+  const isLocalDevelopment =
+    req.headers.host?.includes("localhost") ||
+    req.headers.host?.includes("127.0.0.1") ||
+    process.env.NODE_ENV === "development";
 
-  successMessage(
-    res,
-    201,
-    "success",
-    "User verified successfully",
-    findOtp,
-    token
-  );
+  if (!isLocalDevelopment) {
+    res.cookie("token", token, {
+      httpOnly: false,
+      secure: !isLocalDevelopment,
+      sameSite: isLocalDevelopment ? "lax" : "none",
+      domain: isLocalDevelopment ? frontendUrl : process.env.FRONTEND_URL,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    successMessage(
+      res,
+      201,
+      "success",
+      "User verified successfully",
+      findOtp,
+      token
+    );
+  }
 });
 
 // resend the otp
@@ -178,14 +186,29 @@ export const login = catchAsync(async (req, res, next) => {
   }
 
   const token = signToken(user._id);
+  const isLocalDevelopment =
+    req.headers.host?.includes("localhost") ||
+    req.headers.host?.includes("127.0.0.1") ||
+    process.env.NODE_ENV === "development";
 
-  res.cookie("token", token, {
-    httpOnly: false,
-    secure: false,
-    maxAge: 24 * 60 * 60 * 1000,
-  });
+  if (!isLocalDevelopment) {
+    res.cookie("token", token, {
+      httpOnly: false,
+      secure: !isLocalDevelopment,
+      sameSite: isLocalDevelopment ? "lax" : "none",
+      domain: isLocalDevelopment ? frontendUrl : process.env.FRONTEND_URL,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
-  successMessage(res, 200, "success", "user is logged in", user, token);
+    successMessage(
+      res,
+      201,
+      "success",
+      "User verified successfully",
+      findOtp,
+      token
+    );
+  }
 });
 
 // forgot password functionality
@@ -282,7 +305,7 @@ export const googleCallback = catchAsync(async (req, res, next) => {
       httpOnly: false,
       secure: !isLocalDevelopment,
       sameSite: isLocalDevelopment ? "lax" : "none",
-      domain: isLocalDevelopment ? undefined : undefined,
+      domain: isLocalDevelopment ? frontendUrl : process.env.FRONTEND_URL,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
