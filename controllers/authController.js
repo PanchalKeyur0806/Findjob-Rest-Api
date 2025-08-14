@@ -95,10 +95,9 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
 
   // set token to cookie
   res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "none",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    secure: false,
   });
 
   successMessage(
@@ -181,10 +180,9 @@ export const login = catchAsync(async (req, res, next) => {
   const token = signToken(user._id);
 
   res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "none",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    secure: false,
   });
 
   successMessage(res, 200, "success", "user is logged in", user, token);
@@ -264,10 +262,9 @@ export const googleCallback = catchAsync(async (req, res, next) => {
   const token = signToken(req.user.id);
 
   res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "none",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    secure: false,
   });
   res.redirect("http://localhost:5173/");
 });
