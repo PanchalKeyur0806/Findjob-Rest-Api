@@ -25,6 +25,8 @@ const _dirname = path.dirname(_filename);
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 // middlewares
 app.use(
   cors({
