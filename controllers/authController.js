@@ -95,9 +95,8 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
 
   // set token to cookie
   res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    httpOnly: false,
+    secure: false,
     maxAge: 24 * 60 * 60 * 1000,
   });
 
@@ -181,9 +180,8 @@ export const login = catchAsync(async (req, res, next) => {
   const token = signToken(user._id);
 
   res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    httpOnly: false,
+    secure: false,
     maxAge: 24 * 60 * 60 * 1000,
   });
 
@@ -263,11 +261,31 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 export const googleCallback = catchAsync(async (req, res, next) => {
   const token = signToken(req.user.id);
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: 24 * 60 * 60 * 1000,
-  });
-  res.redirect("http://localhost:5173/auth/success");
+  const isLocalDevelopment =
+    req.headers.host?.includes("localhost") ||
+    req.headers.host?.includes("127.0.0.1") ||
+    process.env.NODE_ENV === "development";
+
+  // set the frontend url according to project stage
+  const frontendUrl = isLocalDevelopment
+    ? "http://localhost:5173"
+    : process.env.FRONTEND_URL;
+
+  // check that project is in development or not
+  // if it is send local server link
+  if (isLocalDevelopment) {
+    res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
+  }
+  // else send cookie in frontend
+  else {
+    res.cookie("token", token, {
+      httpOnly: false,
+      secure: !isLocalDevelopment,
+      sameSite: isLocalDevelopment ? "lax" : "none",
+      domain: isLocalDevelopment ? undefined : undefined,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.redirect(frontendUrl);
+  }
 });
