@@ -305,7 +305,6 @@ export const googleCallback = catchAsync(async (req, res, next) => {
       httpOnly: false,
       secure: !isLocalDevelopment,
       sameSite: isLocalDevelopment ? "lax" : "none",
-      domain: isLocalDevelopment ? frontendUrl : process.env.FRONTEND_URL,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
