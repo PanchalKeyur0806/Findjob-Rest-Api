@@ -103,19 +103,21 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
       httpOnly: false,
       secure: !isLocalDevelopment,
       sameSite: isLocalDevelopment ? "lax" : "none",
-      domain: isLocalDevelopment ? frontendUrl : process.env.FRONTEND_URL,
+      domain: ".onrender.com",
       maxAge: 24 * 60 * 60 * 1000,
     });
-
-    successMessage(
-      res,
-      201,
-      "success",
-      "User verified successfully",
-      findOtp,
-      token
-    );
   }
+
+  // send response to the client
+
+  successMessage(
+    res,
+    201,
+    "success",
+    "User verified successfully",
+    findOtp,
+    token
+  );
 });
 
 // resend the otp
@@ -196,19 +198,20 @@ export const login = catchAsync(async (req, res, next) => {
       httpOnly: false,
       secure: !isLocalDevelopment,
       sameSite: isLocalDevelopment ? "lax" : "none",
-      domain: isLocalDevelopment ? frontendUrl : process.env.FRONTEND_URL,
+      domain: ".onrender.com",
       maxAge: 24 * 60 * 60 * 1000,
     });
-
-    successMessage(
-      res,
-      201,
-      "success",
-      "User verified successfully",
-      findOtp,
-      token
-    );
   }
+
+  // send response to the client
+  successMessage(
+    res,
+    201,
+    "success",
+    "User verified successfully",
+    findOtp,
+    token
+  );
 });
 
 // forgot password functionality
@@ -302,9 +305,10 @@ export const googleCallback = catchAsync(async (req, res, next) => {
   // else send cookie in frontend
   else {
     res.cookie("token", token, {
-      httpOnly: false,
+      httpOnly: true,
       secure: !isLocalDevelopment,
       sameSite: isLocalDevelopment ? "lax" : "none",
+      domain: ".onrender.com",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
