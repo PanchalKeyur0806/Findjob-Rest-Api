@@ -39,7 +39,7 @@ export const register = catchAsync(async (req, res, next) => {
     dateOfBirth,
     phoneNumber,
     otp: generatedOtp,
-    roles: process.env.NODE_ENV === "test" ? roles : "candidate",
+    roles,
   });
   if (!user) {
     return next(new AppError("User not created", 404));
@@ -50,7 +50,7 @@ export const register = catchAsync(async (req, res, next) => {
   const message = `heres your otp ${generatedOtp}`;
 
   //   send email to client
-  if (process.env.NODE_ENV !== "test") {
+  if (process.env.NODE_ENV !== "development") {
     sendEmail({
       subject: subject,
       message: message,
@@ -64,13 +64,13 @@ export const register = catchAsync(async (req, res, next) => {
 
 // verify the token
 export const verifyOtp = catchAsync(async (req, res, next) => {
-  const { otp } = req.body;
+  const { otp, email } = req.body;
   if (!otp) {
     return next(new AppError("Please provide the otp", 404));
   }
 
   // find the otp
-  const findOtp = await User.findOne({ otp });
+  const findOtp = await User.findOne({ otp, email });
   if (!findOtp) {
     return next(new AppError("Otp not found", 404));
   }
