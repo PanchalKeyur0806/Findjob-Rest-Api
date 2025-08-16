@@ -208,7 +208,7 @@ export const login = catchAsync(async (req, res, next) => {
     201,
     "success",
     "User verified successfully",
-    findOtp,
+    user,
     token
   );
 });
