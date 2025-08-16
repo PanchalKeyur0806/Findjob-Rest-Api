@@ -1,7 +1,7 @@
 import otpGenerator from "otp-generator";
 
 function generateOtp() {
-  if (process.env.NODE_ENV === "test") {
+  if (process.env.NODE_ENV === "development") {
     return "123456";
   }
 

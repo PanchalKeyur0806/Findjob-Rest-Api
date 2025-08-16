@@ -7,7 +7,6 @@ import { catchAsync } from "../utils/catchAsync.js";
 import { generateOtp } from "../utils/otp-generate.js";
 import { successMessage } from "../utils/successMessage.js";
 import { sendEmail } from "../utils/nodemailer.js";
-import { hostname } from "os";
 import {
   authValidator,
   loginValidator,
