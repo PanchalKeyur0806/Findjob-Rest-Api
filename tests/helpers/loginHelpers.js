@@ -16,7 +16,9 @@ export async function loginHelper(role) {
     roles: role,
   });
 
-  await request(app).post("/api/auth/verifyotp").send({ otp: "123456" });
+  await request(app)
+    .post("/api/auth/verifyotp")
+    .send({ email: email, otp: "123456" });
 
   const res = await request(app).post("/api/auth/login").send({
     email: email,

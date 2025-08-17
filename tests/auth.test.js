@@ -42,7 +42,7 @@ describe("POST /api/auth/register route", () => {
 
     const res = await request(app)
       .post("/api/auth/verifyotp")
-      .send({ otp: "123456" });
+      .send({ email: email, otp: "123456" });
 
     expect(res.statusCode).toBe(201);
     expect(res.body.status).toBe("success");

@@ -109,6 +109,12 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
 
   // send response to the client
 
+  res.cookie("token", token, {
+    httpOnly: false,
+    secure: false,
+    maxAge: 24 * 60 * 60,
+  });
+
   successMessage(
     res,
     201,
@@ -163,7 +169,12 @@ export const resendOtp = catchAsync(async (req, res, next) => {
 
 // logout functionality
 export const logout = catchAsync(async (req, res, next) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "lax" : "none",
+    domain: process.env.NODE_ENV ? ".onrender.com" : undefined,
+  });
   successMessage(res, 200, "success", "user is logged out");
 });
 
@@ -202,15 +213,14 @@ export const login = catchAsync(async (req, res, next) => {
     });
   }
 
+  res.cookie("token", token, {
+    httpOnly: false,
+    secure: false,
+    maxAge: 24 * 60 * 60,
+  });
+
   // send response to the client
-  successMessage(
-    res,
-    201,
-    "success",
-    "User verified successfully",
-    user,
-    token
-  );
+  successMessage(res, 200, "success", "user is logged in", user, token);
 });
 
 // forgot password functionality
