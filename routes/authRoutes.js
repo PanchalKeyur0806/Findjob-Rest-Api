@@ -9,7 +9,9 @@ import {
   googleCallback,
   forgotpassword,
   resetPassword,
+  getUserInfo,
 } from "../controllers/authController.js";
+import { protect } from "../middlewares/protect.js";
 
 const routes = e.Router();
 
@@ -20,6 +22,7 @@ routes.post("/verifyotp", verifyOtp);
 routes.post("/forgotpassword", forgotpassword);
 routes.post("/resetpassword/:token", resetPassword);
 routes.post("/resendotp/:userid", resendOtp);
+routes.get("/me", protect, getUserInfo);
 
 routes.get(
   "/google",

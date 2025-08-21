@@ -92,12 +92,22 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
   // generate the token
   const token = signToken(findOtp._id);
 
+  // check that server is in development
   const isLocalDevelopment =
     req.headers.host?.includes("localhost") ||
     req.headers.host?.includes("127.0.0.1") ||
     process.env.NODE_ENV === "development";
 
-  if (!isLocalDevelopment) {
+  if (isLocalDevelopment) {
+    // LOCAL-SERVER SETTING
+    res.cookie("token", token, {
+      httpOnly: false,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+  } else {
+    // PRODUCTION SETTING
     res.cookie("token", token, {
       httpOnly: false,
       secure: !isLocalDevelopment,
@@ -106,14 +116,6 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
   }
-
-  // send response to the client
-
-  res.cookie("token", token, {
-    httpOnly: false,
-    secure: false,
-    maxAge: 24 * 60 * 60,
-  });
 
   successMessage(
     res,
@@ -169,12 +171,7 @@ export const resendOtp = catchAsync(async (req, res, next) => {
 
 // logout functionality
 export const logout = catchAsync(async (req, res, next) => {
-  res.clearCookie("token", {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "lax" : "none",
-    domain: process.env.NODE_ENV ? ".onrender.com" : undefined,
-  });
+  res.clearCookie("token");
   successMessage(res, 200, "success", "user is logged out");
 });
 
@@ -203,7 +200,16 @@ export const login = catchAsync(async (req, res, next) => {
     req.headers.host?.includes("127.0.0.1") ||
     process.env.NODE_ENV === "development";
 
-  if (!isLocalDevelopment) {
+  if (isLocalDevelopment) {
+    // LOCAL-SERVER SETTING
+    res.cookie("token", token, {
+      httpOnly: false,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+  } else {
+    // PRODUCTION SETTING
     res.cookie("token", token, {
       httpOnly: false,
       secure: !isLocalDevelopment,
@@ -212,12 +218,6 @@ export const login = catchAsync(async (req, res, next) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
   }
-
-  res.cookie("token", token, {
-    httpOnly: false,
-    secure: false,
-    maxAge: 24 * 60 * 60,
-  });
 
   // send response to the client
   successMessage(res, 200, "success", "user is logged in", user, token);
@@ -323,4 +323,24 @@ export const googleCallback = catchAsync(async (req, res, next) => {
 
     res.redirect(frontendUrl);
   }
+});
+
+// get information of current user
+export const getUserInfo = catchAsync(async (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) return next(new AppError("Token not found", 404));
+
+  // decoding the cookie
+  const decode = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decode.id).select(
+    "-password -otpVerifyTime -roles -authProvider"
+  );
+  if (!user) return next(new AppError("User not found", 404));
+
+  // check that user is verified or not
+  if (!user.isVerified) return next(new AppError("User is not verified", 400));
+
+  // send response to the client
+  res.status(200).json({ status: "success", user });
 });
