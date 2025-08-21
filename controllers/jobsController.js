@@ -6,6 +6,7 @@ import AppError from "../utils/AppError.js";
 import ApiFeature from "../utils/ApiFeature.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import { successMessage } from "../utils/successMessage.js";
+import mongoose from "mongoose";
 
 // RECRUITERS ACTION
 
@@ -157,4 +158,27 @@ export const getOneJob = catchAsync(async (req, res, next) => {
   }
 
   successMessage(res, 200, "success", "job found", job);
+});
+
+// get latest jobs
+export const getLatestJobs = catchAsync(async (req, res, next) => {
+  const limit = 10;
+
+  const findLatestJobPipeline = [
+    {
+      $sort: { createdAt: -1 },
+    },
+    {
+      $limit: limit,
+    },
+  ];
+
+  const findLatestJob = await JobModel.aggregate(findLatestJobPipeline);
+
+  res.status(200).json({
+    status: "success",
+    message: "all latest jobs found",
+    length: findLatestJob.length,
+    data: findLatestJob,
+  });
 });

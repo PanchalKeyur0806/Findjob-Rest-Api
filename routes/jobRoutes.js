@@ -6,6 +6,7 @@ import {
   deleteJobAdmin,
   getAllJobs,
   getAllRecruiterJobs,
+  getLatestJobs,
   getOneJob,
 } from "../controllers/jobsController.js";
 
@@ -14,6 +15,9 @@ import { protect } from "../middlewares/protect.js";
 import { restrictTo } from "../middlewares/restrictTo.js";
 
 const routes = Router();
+
+// aggregation functions
+routes.get("/latestjobs", getLatestJobs);
 
 // this routes is only for recruiter
 // api/jobs/create/company/:companyId
