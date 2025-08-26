@@ -51,7 +51,9 @@ routes.get(
 );
 
 // this route is only for admin
-routes.route("/").get(protect, restrictTo("admin"), getAllJobs);
+routes
+  .route("/")
+  .get(protect, restrictTo("admin", "candidate", "recruiter"), getAllJobs);
 routes.delete("/admin/delete/:jobId", deleteJobAdmin);
 
 export default routes;

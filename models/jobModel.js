@@ -42,5 +42,14 @@ jobSchema.pre(/^find/, async function (next) {
   next();
 });
 
+jobSchema.pre(/^find/, async function (next) {
+  this.populate({
+    path: "company",
+    select: "-_id -__v -isClaimed, -isActive",
+  });
+
+  next();
+});
+
 const JobModel = mongoose.model("JobModel", jobSchema);
 export default JobModel;

@@ -171,6 +171,14 @@ export const getLatestJobs = catchAsync(async (req, res, next) => {
     {
       $limit: limit,
     },
+    {
+      $lookup: {
+        from: "companies",
+        localField: "company",
+        foreignField: "_id",
+        as: "company",
+      },
+    },
   ];
 
   const findLatestJob = await JobModel.aggregate(findLatestJobPipeline);
