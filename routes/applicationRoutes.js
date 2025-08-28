@@ -4,6 +4,7 @@ import {
   getAllJobApplication,
   retriveApplication,
   submitApplication,
+  viewAllApplications,
   viewApplication,
 } from "../controllers/applicationsController.js";
 
@@ -23,6 +24,12 @@ routes.post(
 );
 
 routes.get("/user/view/:applciationId", protect, viewApplication);
+routes.get(
+  "/user/views",
+  protect,
+  restrictTo("candidate"),
+  viewAllApplications
+);
 routes.delete("/user/retrive/:applciationId", protect, retriveApplication);
 
 // recruiter routes

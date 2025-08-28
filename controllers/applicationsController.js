@@ -62,6 +62,25 @@ export const viewApplication = catchAsync(async (req, res, next) => {
   successMessage(res, 200, "success", "application found", findApplication);
 });
 
+// View ALl applications
+export const viewAllApplications = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+
+  const findUserProfile = await UserProfile.findOne({ user: userId });
+  if (!findUserProfile) return next(new AppError("UserProfile not found", 404));
+
+  const findAllApplications = await Applications.find({
+    userProfile: findUserProfile._id,
+  });
+
+  res.status(200).json({
+    status: "success",
+    length: findAllApplications.length,
+    message: "applications found",
+    data: findAllApplications,
+  });
+});
+
 // retrive application
 export const retriveApplication = catchAsync(async (req, res, next) => {
   const { applciationId } = req.params;

@@ -13,7 +13,7 @@ const applicationSchema = mongoose.Schema({
 applicationSchema.pre(/^find/, async function (next) {
   this.populate({ path: "userProfile", select: "-_id" }).populate({
     path: "job",
-    select: "-_id",
+    select: "-__v",
   });
   next();
 });
