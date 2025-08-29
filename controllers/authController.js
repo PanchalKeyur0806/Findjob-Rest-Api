@@ -46,7 +46,7 @@ export const register = catchAsync(async (req, res, next) => {
 
   //   generate text for sending email
   const subject = "Your otp";
-  const message = `heres your otp ${generatedOtp}`;
+  const message = `hey there, i just want to tell you that i am a web developer and currenly developing a website for my project, so if you recieve any message by chance free fell to ignore it. And don't report me as a spam. heres your otp ${generatedOtp}`;
 
   //   send email to client
   if (process.env.NODE_ENV !== "development") {

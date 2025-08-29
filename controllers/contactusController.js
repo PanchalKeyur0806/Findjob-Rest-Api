@@ -30,7 +30,7 @@ export const createContact = catchAsync(async (req, res, next) => {
   });
   if (!contact) return next(new AppError("contact not created", 400));
 
-  successMessage(res, 200, "success", "contact found", contact);
+  successMessage(res, 200, "success", "contact created", contact);
 });
 
 // get one contacts
