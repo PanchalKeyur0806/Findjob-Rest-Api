@@ -67,10 +67,7 @@ export const createJobs = catchAsync(async (req, res, next) => {
 export const getAllRecruiterJobs = catchAsync(async (req, res, next) => {
   const { companyId } = req.params;
 
-  console.log("inside recruitersjob ", companyId);
-
   const jobs = await JobModel.find({ company: companyId });
-  console.log("inside recruitersjob ", jobs);
 
   if (jobs.length <= 0) {
     return next(new AppError("Job not found", 404));
@@ -87,8 +84,6 @@ export const deleteJob = catchAsync(async (req, res, next) => {
     isActive: false,
   });
 
-  console.log(job);
-
   if (!updateJob) {
     return next(new AppError("Job was not updated", 404));
   }
@@ -100,23 +95,65 @@ export const deleteJob = catchAsync(async (req, res, next) => {
 
 // get all jobs (admin)
 export const getAllJobs = catchAsync(async (req, res, next) => {
-  const features = new ApiFeature(JobModel.find(), req.query, [
-    "title",
-    "skills",
-    "location",
-  ])
-    .search()
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
+  const { search, employeeType, sort } = req.query;
+  const queryObj = {};
 
-  const jobs = await features.query;
+  // search by job title and location
+  if (search) {
+    queryObj.$or = [
+      { title: { $regex: search, $options: "i" } },
+      {
+        location: { $regex: search, $options: "i" },
+      },
+    ];
+  }
+
+  // search by employee Type
+  if (employeeType && employeeType !== "all") {
+    queryObj.employeeType = employeeType;
+  }
+
+  // sorting
+  const sortOptions = {
+    newest: "-createdAt",
+    price: "-price",
+  };
+  const sortKey = sortOptions[sort] || sortOptions.newest;
+
+  // pagination
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const jobs = await JobModel.find(queryObj)
+    .sort(sortKey)
+    .skip(skip)
+    .limit(limit);
+  const totalJobs = await JobModel.countDocuments(queryObj);
+  const numOgPages = Math.ceil(totalJobs / limit);
+
+  // const features = new ApiFeature(JobModel.find(), req.query, [
+  //   "title",
+  //   "skills",
+  //   "location",
+  // ])
+  //   .search()
+  //   .filter()
+  //   .sort()
+  //   .limitFields()
+  //   .paginate();
+
+  // const jobs = await features.query;
   if (jobs.length <= 0) {
     return next(new AppError("Jobs not found", 404));
   }
 
-  successMessage(res, 200, "success", "jobs found", jobs);
+  successMessage(res, 200, "success", "jobs found", {
+    totalJobs: totalJobs,
+    numOgPages,
+    currentPage: page,
+    jobs,
+  });
 });
 
 // delete one job
