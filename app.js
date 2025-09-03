@@ -6,6 +6,8 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import { fileURLToPath } from "url";
 import path from "path";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 // routes
 import authRoutes from "./routes/authRoutes.js";
@@ -25,6 +27,16 @@ const _filename = fileURLToPath(import.meta.url);
 const _dirname = path.dirname(_filename);
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  pingTimeout: 60000,
+  cors: {
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  },
+});
+
+app.set("io", io);
 
 // middlewares
 app.use(
@@ -60,4 +72,4 @@ app.use("/", indexRoutes);
 
 app.use(errorHandler);
 
-export default app;
+export default httpServer;
