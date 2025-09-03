@@ -19,6 +19,7 @@ import applicationRoutes from "./routes/applicationRoutes.js";
 import contactRoutes from "./routes/cotnactusRoutes.js";
 import indexRoutes from "./routes/appRoutes.js";
 import errorHandler from "./controllers/errorHandler.js";
+import { initializeSocketIO } from "./sockets/setupSocketIO.js";
 import "./config/passport.js";
 
 dotenv.config({ path: ".env" });
@@ -69,6 +70,9 @@ app.use("/api/jobs", jobsRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/", indexRoutes);
+
+// initialize socket io
+initializeSocketIO(io);
 
 app.use(errorHandler);
 
