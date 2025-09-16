@@ -19,6 +19,10 @@ export const socketEvents = {
   contact_created: "contact_created",
   contact_replied: "contact_replied",
 
+  // ADMIN CONNECT EVENT
+  admin_connected: "admin_connected",
+  admin_disconnected: "admin_disconnected",
+
   // DISCONNECT EVENT
   disconnect: "disconnect",
   error: "error",

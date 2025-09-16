@@ -1,6 +1,7 @@
 import e from "express";
 import {
   createUserProfile,
+  findAllUser,
   getUserProfile,
   updateUserProfile,
 } from "../controllers/userProfileController.js";
@@ -15,6 +16,7 @@ routes
   .route("/")
   .post(protect, upload.single("resumeFile"), createUserProfile)
   .get(protect, getUserProfile);
+routes.get("/users", protect, findAllUser);
 routes.patch("/:profileId", protect, updateUserProfile);
 
 export default routes;

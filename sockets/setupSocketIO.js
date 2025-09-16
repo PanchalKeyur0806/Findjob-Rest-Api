@@ -3,13 +3,39 @@ import { socketEvents } from "./socketEvents.js";
 import AppError from "../utils/AppError.js";
 import User from "../models/userModel.js";
 
+const adminConnectedEvent = (socket, data) => {
+  // check that user is admin or not
+  if (data.roles !== "admin")
+    throw new AppError("Only Admins are allowed", 401);
+
+  socket.user = data;
+  socket.join("admins");
+
+  socket.on(socketEvents.admin_connected, (message) => {
+    console.log(message);
+  });
+};
+
+const adminDisconnectedEvent = (socket, data) => {
+  if (data.roles !== "admin")
+    throw new AppError("Only admins are allowed", 401);
+
+  socket.user = data;
+  socket.leave("admins");
+
+  socket.on(socketEvents.admin_disconnected, (message) => {
+    console.log(message);
+  });
+};
+
 export const initializeSocketIO = (io) => {
   return io.on("connection", async (socket) => {
     try {
-      console.log("User connected");
-
       const cookie = socket.handshake.headers?.cookie;
-      const token = cookie.split("; ")[1].split("token=")[1];
+      const token = cookie
+        .split("; ")
+        .find((token) => token.startsWith("token="))
+        .split("token=")[1];
 
       const decode = jwt.verify(token, process.env.JWT_SECRET);
       if (!decode) throw new AppError("Token not found", 404);
@@ -18,16 +44,16 @@ export const initializeSocketIO = (io) => {
       const user = await User.findById(decode.id).select(
         "-isVerified -__v -otpVerifyTime -authProvider"
       );
+
       if (!user) throw new AppError("User not found", 404);
 
-      // check that user is admin or not
-      if (user.roles !== "admin") throw new AppError("User is not admin", 400);
+      console.log("User is connected");
 
-      socket.user = user;
-      socket.join(user._id.toString());
+      adminConnectedEvent(socket, user);
+      adminDisconnectedEvent(socket, user);
 
-      // Disconnect EVENTS
-      socket.on(socketEvents.disconnect, () => {
+      // Disconnect EVENT
+      socket.on("disconnect", () => {
         console.log("User disconnedted ");
 
         if (socket.user?._id) {
@@ -38,4 +64,8 @@ export const initializeSocketIO = (io) => {
       socket.emit(socketEvents.error, error?.message);
     }
   });
+};
+
+export const emitSocketEvent = (req, roomId, event, payload) => {
+  req.app.get("io").in(roomId).emit(event, payload);
 };

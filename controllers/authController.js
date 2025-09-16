@@ -11,6 +11,8 @@ import {
   authValidator,
   loginValidator,
 } from "../middlewares/validators/authentication.js";
+import { emitSocketEvent } from "../sockets/setupSocketIO.js";
+import { socketEvents } from "../sockets/socketEvents.js";
 
 // sign token
 const signToken = (userId) => {
