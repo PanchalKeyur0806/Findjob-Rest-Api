@@ -20,7 +20,7 @@ const companySchema = mongoose.Schema(
     createdAt: { type: Date, default: Date.now },
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 

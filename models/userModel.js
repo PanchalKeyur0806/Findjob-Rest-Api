@@ -1,49 +1,54 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const userSchema = mongoose.Schema({
-  // basic user info
-  name: {
-    type: String,
-    required: true,
+const userSchema = mongoose.Schema(
+  {
+    // basic user info
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+    },
+    phoneNumber: {
+      type: Number,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+    roles: {
+      type: String,
+      enum: ["candidate", "recruiter", "admin"],
+      default: "candidate",
+      required: true,
+    },
+    otp: {
+      type: String,
+    },
+    otpVerifyTime: {
+      type: Date,
+      default: () => Date.now() + 60 * 1000,
+    },
+    passwordResetToken: { type: String },
+    passowrdTokenExpires: { type: Date },
+    isVerified: { type: Boolean, default: false },
+    googleId: { type: String },
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-  },
-  phoneNumber: {
-    type: Number,
-  },
-  dateOfBirth: {
-    type: Date,
-  },
-  authProvider: {
-    type: String,
-    enum: ["local", "google"],
-    default: "local",
-  },
-  roles: {
-    type: String,
-    enum: ["candidate", "recruiter", "admin"],
-    default: "candidate",
-    required: true,
-  },
-  otp: {
-    type: String,
-  },
-  otpVerifyTime: {
-    type: Date,
-    default: () => Date.now() + 60 * 1000,
-  },
-  passwordResetToken: { type: String },
-  passowrdTokenExpires: { type: Date },
-  isVerified: { type: Boolean, default: false },
-  googleId: { type: String },
-});
+  {
+    timestamps: true,
+  }
+);
 
 // encrypt the password
 userSchema.pre("save", async function (next) {

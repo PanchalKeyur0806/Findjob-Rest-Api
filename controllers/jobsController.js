@@ -62,6 +62,9 @@ export const createJobs = catchAsync(async (req, res, next) => {
     return next(new AppError("Job not created", 400));
   }
 
+  emitSocketEvent(req, "admins", socketEvents.job_created, createJob);
+  console.log("Event is emmited");
+
   successMessage(res, 201, "success", "job created", createJob);
 });
 

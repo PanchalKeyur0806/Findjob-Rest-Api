@@ -9,23 +9,12 @@ const adminConnectedEvent = (socket, data) => {
     throw new AppError("Only Admins are allowed", 401);
 
   socket.user = data;
-  socket.join("admins");
+  socket.join(data._id.toString());
 
-  socket.on(socketEvents.admin_connected, (message) => {
-    console.log(message);
-  });
-};
-
-const adminDisconnectedEvent = (socket, data) => {
-  if (data.roles !== "admin")
-    throw new AppError("Only admins are allowed", 401);
-
-  socket.user = data;
-  socket.leave("admins");
-
-  socket.on(socketEvents.admin_disconnected, (message) => {
-    console.log(message);
-  });
+  if (data.roles.toLowerCase() === "admin") {
+    socket.join("admins");
+    console.log(`Admin joined the room ${socket.id}`);
+  }
 };
 
 export const initializeSocketIO = (io) => {
@@ -49,8 +38,9 @@ export const initializeSocketIO = (io) => {
 
       console.log("User is connected");
 
-      adminConnectedEvent(socket, user);
-      adminDisconnectedEvent(socket, user);
+      if (user.roles === "admin") {
+        adminConnectedEvent(socket, user);
+      }
 
       // Disconnect EVENT
       socket.on("disconnect", () => {
@@ -67,5 +57,5 @@ export const initializeSocketIO = (io) => {
 };
 
 export const emitSocketEvent = (req, roomId, event, payload) => {
-  req.app.get("io").in(roomId).emit(event, payload);
+  req.app.get("io").to(roomId).emit(event, payload);
 };

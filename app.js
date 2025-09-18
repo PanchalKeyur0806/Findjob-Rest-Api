@@ -11,6 +11,7 @@ import { Server } from "socket.io";
 
 // routes
 import authRoutes from "./routes/authRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import userProfileRoutes from "./routes/userProfile.js";
 import companyRoutes from "./routes/companyRoutes.js";
 import claimRoutes from "./routes/claimRoutes.js";
@@ -63,6 +64,7 @@ app.use(passport.session());
 
 // routes for the application
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/userprofile", userProfileRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/claims", claimRoutes);
