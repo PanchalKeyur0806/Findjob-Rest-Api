@@ -49,3 +49,88 @@ export const getAllStats = catchAsync(async (req, res, next) => {
     claims: claimStats,
   });
 });
+
+export const getAllCharts = catchAsync(async (req, res, next) => {
+  const currentDate = new Date();
+  const previousWeekDate = new Date(new Date() - 7 * 24 * 60 * 60 * 1000);
+
+  const [user, companies, jobs, claims] = await Promise.all([
+    User.aggregate([
+      { $match: { createdAt: { $gte: previousWeekDate, $lte: currentDate } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+
+    Company.aggregate([
+      { $match: { createdAt: { $gte: previousWeekDate, $lte: currentDate } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+
+    JobModel.aggregate([
+      { $match: { createdAt: { $gte: previousWeekDate, $lte: currentDate } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    ClaimModel.aggregate([
+      { $match: { createdAt: { $gte: previousWeekDate, $lte: currentDate } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+  ]);
+
+  const statsMap = {};
+  const collections = { user, companies, jobs, claims };
+  let results = [];
+
+  Object.entries(collections).forEach(([key, arr]) => {
+    arr.forEach(({ _id, count }) => {
+      if (!statsMap[_id]) {
+        statsMap[_id] = {
+          date: _id,
+          user: 0,
+          companies: 0,
+          jobs: 0,
+          claims: 0,
+        };
+      }
+      statsMap[_id][key] = count;
+    });
+  });
+
+  for (
+    let date = new Date(previousWeekDate);
+    date <= currentDate;
+    date.setDate(date.getDate() + 1)
+  ) {
+    const dateStr = date.toISOString().split("T")[0];
+
+    results.push(
+      statsMap[dateStr] || {
+        date: dateStr,
+        user: 0,
+        companies: 0,
+        jobs: 0,
+        claims: 0,
+      }
+    );
+  }
+
+  successMessage(res, 200, "success", "analytics found", results);
+});
