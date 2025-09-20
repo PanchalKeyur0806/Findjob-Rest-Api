@@ -115,7 +115,9 @@ export const getAllCharts = catchAsync(async (req, res, next) => {
   });
 
   for (
-    let date = new Date(previousWeekDate);
+    let date = new Date(
+      previousWeekDate.setDate(previousWeekDate.getDate() + 1)
+    );
     date <= currentDate;
     date.setDate(date.getDate() + 1)
   ) {
@@ -133,4 +135,43 @@ export const getAllCharts = catchAsync(async (req, res, next) => {
   }
 
   successMessage(res, 200, "success", "analytics found", results);
+});
+
+// total active users
+export const totalActiveUser = catchAsync(async (req, res, next) => {
+  const users = await User.aggregate([
+    {
+      $facet: {
+        totalActiveUsers: [
+          {
+            $match: { isVerified: true },
+          },
+          {
+            $group: {
+              _id: "$isVerified",
+              count: { $sum: 1 },
+            },
+          },
+        ],
+        totalInActiveUsers: [
+          { $match: { isVerified: { $ne: true } } },
+          {
+            $group: {
+              _id: "$isVerified",
+              count: { $sum: 1 },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  const statsMap = [
+    {
+      totalActiveUser: users[0].totalActiveUsers[0].count,
+      totalInActiveUsers: users[0].totalInActiveUsers[0].count,
+    },
+  ];
+
+  successMessage(res, 200, "success", "active users found", statsMap);
 });

@@ -9,6 +9,7 @@ import { successMessage } from "../utils/successMessage.js";
 import mongoose from "mongoose";
 import { emitSocketEvent } from "../sockets/setupSocketIO.js";
 import { socketEvents } from "../sockets/socketEvents.js";
+import { Notification } from "../models/notificationModel.js";
 
 // RECRUITERS ACTION
 
@@ -62,8 +63,15 @@ export const createJobs = catchAsync(async (req, res, next) => {
     return next(new AppError("Job not created", 400));
   }
 
-  emitSocketEvent(req, "admins", socketEvents.job_created, createJob);
-  console.log("Event is emmited");
+  // creating notificationSchema
+  const notification = await Notification.create({
+    type: "jobs",
+    message: `New JOb created : ${createJob.title}`,
+    meta: { userId: userId, jobTitle: createJob.title },
+  });
+
+  // emiting the event
+  emitSocketEvent(req, "admins", socketEvents.job_created, notification);
 
   successMessage(res, 201, "success", "job created", createJob);
 });
