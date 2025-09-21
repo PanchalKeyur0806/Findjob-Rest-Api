@@ -9,24 +9,27 @@ import { successMessage } from "../utils/successMessage.js";
 import { emitSocketEvent } from "../sockets/setupSocketIO.js";
 import { socketEvents } from "../sockets/socketEvents.js";
 
-const getRecentStats = async (Model, filter = {}) => {
+const getRecentStats = async (Model) => {
   const currentDate = new Date();
   const startOfCurrentWeek = new Date(new Date() - 7 * 24 * 60 * 60 * 1000);
   const startOfPreWeek = new Date(new Date() - 14 * 24 * 60 * 60 * 1000);
 
   const currentWeekCount = await Model.countDocuments({
-    ...filter,
-    createdAt: { $gte: startOfCurrentWeek, $lte: currentDate },
+    createdAt: { $gte: startOfCurrentWeek, $lt: currentDate },
   });
+
   const previousWeekCount = await Model.countDocuments({
-    ...filter,
+    createdAt: { $gte: startOfPreWeek, $lt: startOfCurrentWeek },
+  });
+
+  const totalDocuments = await Model.countDocuments({
     createdAt: { $gte: startOfPreWeek, $lte: currentDate },
   });
 
   let percentageChange = 0;
   if (previousWeekCount > 0) {
     percentageChange =
-      ((currentWeekCount - previousWeekCount) / previousWeekCount) * 100;
+      ((previousWeekCount - currentWeekCount) / totalDocuments) * 100;
   } else {
     percentageChange = currentWeekCount > 0 ? 100 : 0;
   }
@@ -37,7 +40,7 @@ const getRecentStats = async (Model, filter = {}) => {
 };
 
 export const getAllStats = catchAsync(async (req, res, next) => {
-  const userStats = await getRecentStats(User, { isVerified: true });
+  const userStats = await getRecentStats(User);
   const companyStats = await getRecentStats(Company);
   const jobStats = await getRecentStats(JobModel);
   const claimStats = await getRecentStats(ClaimModel);

@@ -6,6 +6,9 @@ import AppError from "../utils/AppError.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import { successMessage } from "../utils/successMessage.js";
 import { uploadFile } from "../utils/cloudinary.js";
+import { Notification } from "../models/notificationModel.js";
+import { emitSocketEvent } from "../sockets/setupSocketIO.js";
+import { socketEvents } from "../sockets/socketEvents.js";
 
 export const getComapanies = catchAsync(async (req, res, next) => {
   const companies = await Company.find();
@@ -74,6 +77,20 @@ export const createCompanies = catchAsync(async (req, res, next) => {
       new AppError("Company is not created yet, please try again", 404)
     );
   }
+
+  // create notification
+  const notification = await Notification.create({
+    type: "company",
+    message: `A new Company is created with ${company.email} email id`,
+    meta: {
+      createdBy: req.user.id,
+      companyName: company.companyName,
+      companyEmail: company.email,
+    },
+  });
+
+  // emit socket EVENTS
+  emitSocketEvent(req, "admins", socketEvents.company_created, notification);
 
   successMessage(res, 201, "success", "comapny created", company);
 });

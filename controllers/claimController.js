@@ -1,6 +1,9 @@
 import { claimValidator } from "../middlewares/validators/claimValidator.js";
 import { ClaimModel } from "../models/claimModel.js";
 import Company from "../models/companyModel.js";
+import { Notification } from "../models/notificationModel.js";
+import { emitSocketEvent } from "../sockets/setupSocketIO.js";
+import { socketEvents } from "../sockets/socketEvents.js";
 
 import AppError from "../utils/AppError.js";
 import { catchAsync } from "../utils/catchAsync.js";
@@ -34,6 +37,21 @@ export const performClaim = catchAsync(async (req, res, next) => {
   if (!claim) {
     return next(new AppError("sorry claim is not created", 404));
   }
+
+  // creating notifications
+  const notification = await Notification.create({
+    type: "claims",
+    message: `New Claim created :- ${claim._id}`,
+    meta: {
+      userId: userId,
+      companyId: company._id,
+      companyName: company.companyName,
+      companyEmail: company.email,
+      companyPhone: company.phoneNumber,
+    },
+  });
+
+  emitSocketEvent(req, "admins", socketEvents.claim_created, notification);
 
   successMessage(
     res,

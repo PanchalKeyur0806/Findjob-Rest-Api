@@ -13,6 +13,7 @@ import {
 } from "../middlewares/validators/authentication.js";
 import { emitSocketEvent } from "../sockets/setupSocketIO.js";
 import { socketEvents } from "../sockets/socketEvents.js";
+import { Notification } from "../models/notificationModel.js";
 
 // sign token
 const signToken = (userId) => {
@@ -90,6 +91,19 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
   findOtp.otpVerifyTime = undefined;
 
   await findOtp.save();
+
+  // create notification
+  const notification = await Notification.create({
+    type: "user",
+    message: `A new verified User is created ${findOtp._id}`,
+    meta: {
+      userId: findOtp._id,
+      userName: findOtp.name,
+      userEmail: findOtp.email,
+    },
+  });
+
+  emitSocketEvent(req, "admins", socketEvents.user_created, notification);
 
   // generate the token
   const token = signToken(findOtp._id);

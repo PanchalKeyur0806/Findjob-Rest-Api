@@ -1,23 +1,21 @@
 export const socketEvents = {
   // JOB EVENTS
   job_created: "job_created",
-  job_deleted: "job_deleted",
 
   // APPLICATION EVENTS
   application_submitted: "application_submitted",
-  application_retrieved: "application_retrieved",
 
   // USER EVENTS
   user_created: "user_created",
-  user_deleted: "user_deleted",
 
   // COMPANY EVENTS
   company_created: "company_created",
-  company_deleted: "company_deleted",
 
   // CONTACT EVENTS
   contact_created: "contact_created",
-  contact_replied: "contact_replied",
+
+  // CLAIM EVENT
+  claim_created: "claim_created",
 
   // ADMIN CONNECT EVENT
   admin_connected: "admin_connected",
