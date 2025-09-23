@@ -29,7 +29,7 @@ const getRecentStats = async (Model) => {
   let percentageChange = 0;
   if (previousWeekCount > 0) {
     percentageChange =
-      ((previousWeekCount - currentWeekCount) / totalDocuments) * 100;
+      ((currentWeekCount - previousWeekCount) / totalDocuments) * 100;
   } else {
     percentageChange = currentWeekCount > 0 ? 100 : 0;
   }
