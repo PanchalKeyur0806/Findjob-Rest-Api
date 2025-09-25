@@ -17,6 +17,9 @@ export const socketEvents = {
   // CLAIM EVENT
   claim_created: "claim_created",
 
+  // CHARTS EVENT
+  charts_updated: "charts_updated",
+
   // ADMIN CONNECT EVENT
   admin_connected: "admin_connected",
   admin_disconnected: "admin_disconnected",

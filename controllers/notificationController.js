@@ -39,7 +39,9 @@ export const getAllUserNotifications = catchAsync(async (req, res, next) => {
   );
 });
 export const getAllClaimsNotifications = catchAsync(async (req, res, next) => {
-  const claimsNotifications = await Notification.find({ type: "claims" });
+  const claimsNotifications = await Notification.find({ type: "claims" }).sort(
+    "-createdAt"
+  );
 
   successMessage(
     res,

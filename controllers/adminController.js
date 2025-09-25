@@ -53,7 +53,7 @@ export const getAllStats = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getAllCharts = catchAsync(async (req, res, next) => {
+export const getAllChartsData = async () => {
   const currentDate = new Date();
   const previousWeekDate = new Date(new Date() - 7 * 24 * 60 * 60 * 1000);
 
@@ -137,7 +137,13 @@ export const getAllCharts = catchAsync(async (req, res, next) => {
     );
   }
 
-  successMessage(res, 200, "success", "analytics found", results);
+  return results;
+};
+
+export const getAllCharts = catchAsync(async (req, res, next) => {
+  const results = await getAllChartsData();
+
+  successMessage(res, 200, "success", "Charts Data found", results);
 });
 
 // total active users

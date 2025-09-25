@@ -14,6 +14,7 @@ import {
 import { emitSocketEvent } from "../sockets/setupSocketIO.js";
 import { socketEvents } from "../sockets/socketEvents.js";
 import { Notification } from "../models/notificationModel.js";
+import { getAllChartsData } from "./adminController.js";
 
 // sign token
 const signToken = (userId) => {
@@ -104,6 +105,9 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
   });
 
   emitSocketEvent(req, "admins", socketEvents.user_created, notification);
+
+  const updateChart = await getAllChartsData();
+  emitSocketEvent(req, "admins", socketEvents.charts_updated, updateChart);
 
   // generate the token
   const token = signToken(findOtp._id);

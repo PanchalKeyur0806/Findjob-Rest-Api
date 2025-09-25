@@ -8,6 +8,7 @@ import { socketEvents } from "../sockets/socketEvents.js";
 import AppError from "../utils/AppError.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import { successMessage } from "../utils/successMessage.js";
+import { getAllChartsData } from "./adminController.js";
 
 export const performClaim = catchAsync(async (req, res, next) => {
   const { error, value } = claimValidator(req.body);
@@ -52,6 +53,9 @@ export const performClaim = catchAsync(async (req, res, next) => {
   });
 
   emitSocketEvent(req, "admins", socketEvents.claim_created, notification);
+
+  const updateChart = await getAllChartsData();
+  emitSocketEvent(req, "admins", socketEvents.charts_updated, updateChart);
 
   successMessage(
     res,

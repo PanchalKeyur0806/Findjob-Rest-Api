@@ -27,7 +27,12 @@ routes
 routes
   .route("/:companyId")
   .get(getOneCompany)
-  .patch(protect, restrictTo("recruiter", "admin"), updateCompany)
+  .patch(
+    protect,
+    restrictTo("recruiter", "admin"),
+    upload.single("companyLogo"),
+    updateCompany
+  )
   .delete(protect, restrictTo("recruiter", "admin"), deleteCompany);
 
 export default routes;

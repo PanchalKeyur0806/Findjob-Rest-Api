@@ -171,6 +171,7 @@ export const updateCompany = catchAsync(async (req, res, next) => {
     }
 
     logoUrl = cloudinaryResponse.url;
+    fs.unlinkSync(file);
   }
 
   const updateData = {
