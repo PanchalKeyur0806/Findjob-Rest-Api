@@ -9,6 +9,7 @@ import { uploadFile } from "../utils/cloudinary.js";
 import { Notification } from "../models/notificationModel.js";
 import { emitSocketEvent } from "../sockets/setupSocketIO.js";
 import { socketEvents } from "../sockets/socketEvents.js";
+import { getAllChartsData } from "./adminController.js";
 
 export const getComapanies = catchAsync(async (req, res, next) => {
   const { name, email } = req.query;
@@ -126,13 +127,69 @@ export const createCompanies = catchAsync(async (req, res, next) => {
   // emit socket EVENTS
   emitSocketEvent(req, "admins", socketEvents.company_created, notification);
 
+  const updateChart = await getAllChartsData();
+  emitSocketEvent(req, "admin", socketEvents.charts_updated, updateChart);
+
   successMessage(res, 201, "success", "comapny created", company);
 });
 
 export const updateCompany = catchAsync(async (req, res, next) => {
   const { companyId } = req.params;
+  const userId = req.user._id;
 
-  const company = await Company.findByIdAndUpdate(companyId, req.body);
+  const findCompany = await Company.findById(companyId);
+  if (!findCompany) {
+    return next(new AppError("Company Not found", 404));
+  }
+
+  // check that userId is same as the who created it
+  if (userId.toString() !== findCompany.createdBy.toString()) {
+    return next(
+      new AppError("You are not allowed to perform this action", 403)
+    );
+  }
+
+  const {
+    companyName,
+    email,
+    phoneNumber,
+    address,
+    description,
+    website,
+    companyLogo,
+  } = req.body;
+
+  let logoUrl;
+
+  // if file exists upload to cloudinary
+  if (req.file && req.file.path) {
+    const file = req.file.path;
+
+    const cloudinaryResponse = await uploadFile(file, "/jobfinder/companyLogo");
+    if (!cloudinaryResponse) {
+      return next(new AppError("Failed to upload image", 400));
+    }
+
+    logoUrl = cloudinaryResponse.url;
+  }
+
+  const updateData = {
+    companyName,
+    email,
+    phoneNumber,
+    address,
+    description,
+    website,
+  };
+
+  if (logoUrl) {
+    updateData.companyLogo = logoUrl;
+  }
+
+  const company = await Company.findByIdAndUpdate(companyId, updateData, {
+    new: true,
+    runValidators: true,
+  });
   if (!company) {
     return next(new AppError("company not found", 404));
   }
@@ -142,13 +199,21 @@ export const updateCompany = catchAsync(async (req, res, next) => {
 
 export const deleteCompany = await catchAsync(async (req, res, next) => {
   const { companyId } = req.params;
+  const userId = req.user._id;
 
-  const company = await Company.findByIdAndUpdate(companyId, {
-    isActive: false,
-  });
-  if (!company) {
-    return next(new AppError("company not found", 404));
+  const findCompany = await Company.findById(companyId);
+  if (!findCompany) {
+    return next(new AppError("Company not found", 404));
   }
+
+  if (userId.toString() !== findCompany.createdBy.toString()) {
+    return next(
+      new AppError("You are not allowed to perform this action", 403)
+    );
+  }
+
+  findCompany.isActive = false;
+  await findCompany.save();
 
   successMessage(res, 204);
 });

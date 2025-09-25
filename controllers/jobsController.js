@@ -10,6 +10,8 @@ import mongoose from "mongoose";
 import { emitSocketEvent } from "../sockets/setupSocketIO.js";
 import { socketEvents } from "../sockets/socketEvents.js";
 import { Notification } from "../models/notificationModel.js";
+import Company from "../models/companyModel.js";
+import { getAllChartsData } from "./adminController.js";
 
 // RECRUITERS ACTION
 
@@ -21,8 +23,19 @@ export const createJobs = catchAsync(async (req, res, next) => {
     return next(new AppError(error.details[0].message, 400));
   }
 
-  const userId = req.user.id;
+  const userId = req.user._id;
   const companyId = req.params.companyId;
+
+  const findCompany = await Company.findById(companyId);
+  if (!findCompany) {
+    return next(new AppError("Company Not Found", 404));
+  }
+
+  if (userId.toString() !== findCompany.createdBy.toString()) {
+    return next(
+      new AppError("You are not allowed to perfrom this action", 403)
+    );
+  }
 
   const {
     title,
@@ -73,14 +86,29 @@ export const createJobs = catchAsync(async (req, res, next) => {
   // emiting the event
   emitSocketEvent(req, "admins", socketEvents.job_created, notification);
 
+  const updateChart = await getAllChartsData();
+  emitSocketEvent(req, 'admins', socketEvents.charts_updated, updateCharts)
+
   successMessage(res, 201, "success", "job created", createJob);
 });
 
 // get all recruiters posted jobs
 export const getAllRecruiterJobs = catchAsync(async (req, res, next) => {
   const { companyId } = req.params;
+  const userId = req.user._id;
 
-  const jobs = await JobModel.find({ company: companyId });
+  const findCompany = await Company.findById(companyId);
+  if (!findCompany) {
+    return next(new AppError("Company Not found", 404));
+  }
+
+  if (userId.toString() !== findCompany.createdBy.toString()) {
+    return next(
+      new AppError("You are not allowed to perform this action", 403)
+    );
+  }
+
+  const jobs = await JobModel.find({ company: companyId, user: userId });
 
   if (jobs.length <= 0) {
     return next(new AppError("Job not found", 404));
@@ -91,17 +119,19 @@ export const getAllRecruiterJobs = catchAsync(async (req, res, next) => {
 
 export const deleteJob = catchAsync(async (req, res, next) => {
   const { jobId } = req.params;
+  const userId = req.user._id;
 
   const job = await JobModel.findById(jobId);
-  const updateJob = await JobModel.findByIdAndUpdate(jobId, {
-    isActive: false,
-  });
-
-  if (!updateJob) {
-    return next(new AppError("Job was not updated", 404));
+  if (job.user.toString() !== userId.toString()) {
+    return next(
+      new AppError("You are not allowed to perfrom this action", 403)
+    );
   }
 
-  successMessage(res, 200, "success", "jobs updated", updateJob);
+  job.isActive = false;
+  await job.save();
+
+  successMessage(res, 200, "success", "jobs updated", job);
 });
 
 // ADMINS ACTION
