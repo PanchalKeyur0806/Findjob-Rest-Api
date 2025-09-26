@@ -5,7 +5,9 @@ import { catchAsync } from "../utils/catchAsync.js";
 import { successMessage } from "../utils/successMessage.js";
 
 export const getAllJobNotifications = catchAsync(async (req, res, next) => {
-  const jobsNotifications = await Notification.find({ type: "jobs" });
+  const jobsNotifications = await Notification.find({ type: "jobs" }).sort(
+    "-createdAt"
+  );
 
   successMessage(
     res,
@@ -17,7 +19,9 @@ export const getAllJobNotifications = catchAsync(async (req, res, next) => {
 });
 
 export const getAllCompanyNotifications = catchAsync(async (req, res, next) => {
-  const companyNotifications = await Notification.find({ type: "company" });
+  const companyNotifications = await Notification.find({
+    type: "company",
+  }).sort("-createdAt");
 
   successMessage(
     res,
@@ -28,7 +32,9 @@ export const getAllCompanyNotifications = catchAsync(async (req, res, next) => {
   );
 });
 export const getAllUserNotifications = catchAsync(async (req, res, next) => {
-  const userNotifications = await Notification.find({ type: "user" });
+  const userNotifications = await Notification.find({ type: "user" }).sort(
+    "-createdAt"
+  );
 
   successMessage(
     res,

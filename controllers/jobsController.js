@@ -87,7 +87,7 @@ export const createJobs = catchAsync(async (req, res, next) => {
   emitSocketEvent(req, "admins", socketEvents.job_created, notification);
 
   const updateChart = await getAllChartsData();
-  emitSocketEvent(req, 'admins', socketEvents.charts_updated, updateCharts)
+  emitSocketEvent(req, "admins", socketEvents.charts_updated, updateChart);
 
   successMessage(res, 201, "success", "job created", createJob);
 });

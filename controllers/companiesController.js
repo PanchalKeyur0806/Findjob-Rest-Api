@@ -31,7 +31,7 @@ export const getComapanies = catchAsync(async (req, res, next) => {
 
   // pagination
   const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
+  const limit = Number(req.query.limit) || 5;
   const skip = (page - 1) * limit;
 
   const companies = await Company.find(queryObj)
@@ -39,7 +39,7 @@ export const getComapanies = catchAsync(async (req, res, next) => {
     .skip(skip)
     .limit(limit);
 
-  const totalDocuments = await Company.countDocuments();
+  const totalDocuments = await Company.countDocuments(queryObj);
   const numOfPages = Math.ceil(totalDocuments / limit);
 
   if (companies.length <= 0) {
@@ -128,7 +128,7 @@ export const createCompanies = catchAsync(async (req, res, next) => {
   emitSocketEvent(req, "admins", socketEvents.company_created, notification);
 
   const updateChart = await getAllChartsData();
-  emitSocketEvent(req, "admin", socketEvents.charts_updated, updateChart);
+  emitSocketEvent(req, "admins", socketEvents.charts_updated, updateChart);
 
   successMessage(res, 201, "success", "comapny created", company);
 });
