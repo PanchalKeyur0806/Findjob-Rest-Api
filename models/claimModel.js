@@ -21,10 +21,10 @@ const claimSchema = mongoose.Schema(
 claimSchema.pre(/^find/, async function (next) {
   this.populate({
     path: "company",
-    select: "companyName email phoneNumber address website description ",
+    select: "companyName email phoneNumber companyLogo ",
   }).populate({
     path: "user",
-    select: "name email phoneNumber dateOfBirth isVerifieds",
+    select: "name email phoneNumber dateOfBirth isVerified",
   });
   next();
 });
