@@ -73,7 +73,7 @@ export const updateUserProfile = catchAsync(async (req, res, next) => {
 
 // Find All the User
 export const findAllUser = catchAsync(async (req, res, next) => {
-  const { search, email, roles } = req.query;
+  const { search, email, roles, sort } = req.query;
 
   let queryObj = {};
   if (search) {
@@ -88,14 +88,19 @@ export const findAllUser = catchAsync(async (req, res, next) => {
     queryObj.roles = roles;
   }
 
+  // sort options
+  const sortOptions = {
+    new: "-createdAt",
+    old: "createdAt",
+  };
+  const sortKey = sortOptions[sort] || sortOptions.new;
+
+  // pagination
   const page = Number(req.query.page || "1");
   const limit = Number(req.query.limit || "10");
   const skip = (page - 1) * limit;
 
-  const users = await User.find(queryObj)
-    .sort("-createdAt")
-    .skip(skip)
-    .limit(limit);
+  const users = await User.find(queryObj).sort(sortKey).skip(skip).limit(limit);
 
   const totalUsers = await User.countDocuments(queryObj);
   const numOfPages = Math.ceil(totalUsers / limit);

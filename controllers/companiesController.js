@@ -12,7 +12,7 @@ import { socketEvents } from "../sockets/socketEvents.js";
 import { getAllChartsData } from "./adminController.js";
 
 export const getComapanies = catchAsync(async (req, res, next) => {
-  const { name, email } = req.query;
+  const { name, email, sort } = req.query;
   const queryObj = {};
 
   // search by company Name and email
@@ -26,8 +26,10 @@ export const getComapanies = catchAsync(async (req, res, next) => {
 
   // sorting
   const sortingOptions = {
-    newest: "-createdAt",
+    new: "-createdAt",
+    old: "createdAt",
   };
+  const sortKey = sortingOptions[sort] || sortingOptions.new;
 
   // pagination
   const page = Number(req.query.page) || 1;
@@ -35,7 +37,7 @@ export const getComapanies = catchAsync(async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   const companies = await Company.find(queryObj)
-    .sort(sortingOptions.newest)
+    .sort(sortKey)
     .skip(skip)
     .limit(limit);
 
