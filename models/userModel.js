@@ -47,8 +47,14 @@ const userSchema = mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+userSchema.virtual("userName").get(function () {
+  return `${this.name}`;
+});
 
 // encrypt the password
 userSchema.pre("save", async function (next) {

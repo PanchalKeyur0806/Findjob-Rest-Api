@@ -20,6 +20,7 @@ import applicationRoutes from "./routes/applicationRoutes.js";
 import contactRoutes from "./routes/cotnactusRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import followRoutes from "./routes/followRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import indexRoutes from "./routes/appRoutes.js";
 import errorHandler from "./controllers/errorHandler.js";
 import { initializeSocketIO } from "./sockets/setupSocketIO.js";
@@ -74,6 +75,7 @@ app.use("/api/jobs", jobsRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/chats", chatRoutes);
 app.use("/api/", followRoutes);
 app.use("/", indexRoutes);
 
