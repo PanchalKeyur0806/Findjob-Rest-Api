@@ -20,6 +20,10 @@ export const socketEvents = {
   // CHARTS EVENT
   charts_updated: "charts_updated",
 
+  // Follow-unfollow event
+  follow: "follower",
+  unfollow: "unfollow",
+
   // ADMIN CONNECT EVENT
   admin_connected: "admin_connected",
   admin_disconnected: "admin_disconnected",

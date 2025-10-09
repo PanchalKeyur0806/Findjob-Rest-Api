@@ -1,3 +1,4 @@
+import Follow from "../models/chatModel/followModel.js";
 import { Notification } from "../models/notificationModel.js";
 
 import AppError from "../utils/AppError.js";
@@ -57,3 +58,32 @@ export const getAllClaimsNotifications = catchAsync(async (req, res, next) => {
     claimsNotifications
   );
 });
+
+// find all the followers  notifications of particular user
+export const getUserFollowerNotification = catchAsync(
+  async (req, res, next) => {
+    const userId = req.user._id;
+
+    const notification = await Notification.find({
+      type: "follow",
+      "meta.followedUser": userId.toString(),
+    });
+
+    const followersId = notification.map((n) => n.meta.userId);
+
+    const alreadyFollowed = await Follow.find({
+      follower: userId,
+      following: { $in: followersId },
+    }).select("following");
+
+    const alreadyFOllowedSet = new Set(
+      alreadyFollowed.map((f) => f.following.toString())
+    );
+
+    const notFollowedSet = notification.filter(
+      (n) => !alreadyFOllowedSet.has(n.meta.userId.toString())
+    );
+
+    successMessage(res, 200, "success", "notifications found", notFollowedSet);
+  }
+);

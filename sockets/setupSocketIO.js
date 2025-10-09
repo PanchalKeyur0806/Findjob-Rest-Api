@@ -36,11 +36,14 @@ export const initializeSocketIO = (io) => {
 
       if (!user) throw new AppError("User not found", 404);
 
-      console.log("User is connected");
-
       if (user.roles === "admin") {
         adminConnectedEvent(socket, user);
       }
+
+      socket.user = user;
+      socket.join(user._id.toString());
+      4;
+      console.log(`user is connected. User Id :- ${user._id.toString()}`);
 
       // Disconnect EVENT
       socket.on("disconnect", () => {
