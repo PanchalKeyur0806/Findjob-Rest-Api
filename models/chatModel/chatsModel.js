@@ -13,6 +13,11 @@ const chatsSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
     },
+    status: {
+      type: String,
+      enum: ["disabled", "enable"],
+      default: "enable",
+    },
   },
   {
     timestamps: true,

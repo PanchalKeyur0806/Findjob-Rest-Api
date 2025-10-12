@@ -24,6 +24,11 @@ export const socketEvents = {
   follow: "follow",
   unfollow: "unfollow",
 
+  // Chat created event
+  chat_created: "chat_created",
+  chat_updated: "chat_updated",
+  chat_deleted: "chat_deleted",
+
   // ADMIN CONNECT EVENT
   admin_connected: "admin_connected",
   admin_disconnected: "admin_disconnected",

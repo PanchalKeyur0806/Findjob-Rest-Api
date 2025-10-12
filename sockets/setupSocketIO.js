@@ -42,7 +42,6 @@ export const initializeSocketIO = (io) => {
 
       socket.user = user;
       socket.join(user._id.toString());
-      4;
       console.log(`user is connected. User Id :- ${user._id.toString()}`);
 
       // Disconnect EVENT

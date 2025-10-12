@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import Follow from "../../models/chatModel/followModel.js";
 import { Notification } from "../../models/notificationModel.js";
 import User from "../../models/userModel.js";
@@ -7,6 +7,8 @@ import { socketEvents } from "../../sockets/socketEvents.js";
 import AppError from "../../utils/AppError.js";
 import { catchAsync } from "../../utils/catchAsync.js";
 import { successMessage } from "../../utils/successMessage.js";
+import ChatModel from "../../models/chatModel/chatsModel.js";
+import { chatCommonAggregation } from "./chatController.js";
 
 // find the user
 export const findUser = catchAsync(async (req, res, next) => {
@@ -86,6 +88,127 @@ export const followUser = catchAsync(async (req, res, next) => {
     emitSocketEvent(req, targetUserId, socketEvents.follow, notification);
   }
 
+  // check that both users follows each other or not
+  const followRelationship = await Follow.findOne({
+    follower: new mongoose.Types.ObjectId(targetUserId),
+    following: followerId,
+  });
+  if (followRelationship) {
+    // check the chat
+    const findChat = await ChatModel.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              users: { $elemMatch: { $eq: followerId } },
+            },
+            {
+              users: {
+                $elemMatch: { $eq: new mongoose.Types.ObjectId(targetUserId) },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const payload = findChat[0];
+
+    if (payload) {
+      const chatUpdate = await ChatModel.findByIdAndUpdate(
+        payload._id,
+        {
+          status: "enable",
+        },
+        { new: true }
+      );
+
+      // find the populated chat
+      const aggregatedChat = await ChatModel.aggregate([
+        {
+          $match: {
+            users: {
+              $all: [followerId, new mongoose.Types.ObjectId(targetUserId)],
+            },
+          },
+        },
+        {
+          $addFields: {
+            users: {
+              $filter: {
+                input: "$users",
+                as: "users",
+                cond: { $ne: ["$$users", followerId] },
+              },
+            },
+          },
+        },
+        ...chatCommonAggregation(),
+      ]);
+
+      const populatedChat = aggregatedChat[0];
+
+      // send updated chat to both user
+      emitSocketEvent(
+        req,
+        followerId.toString(),
+        socketEvents.chat_updated,
+        populatedChat
+      );
+      emitSocketEvent(
+        req,
+        targetUserId.toString(),
+        socketEvents.chat_updated,
+        populatedChat
+      );
+    }
+
+    if (!payload) {
+      // create the chat
+      const newChat = await ChatModel.create({
+        users: [followerId, targetUserId],
+      });
+      if (!newChat)
+        return next(
+          new AppError("Chat is not created yet, please try again", 400)
+        );
+
+      const chatData = await ChatModel.aggregate([
+        {
+          $match: { _id: newChat._id },
+        },
+        {
+          $addFields: {
+            users: {
+              $filter: {
+                input: "$users",
+                as: "users",
+                cond: { $ne: ["$$users", followerId] },
+              },
+            },
+          },
+        },
+        ...chatCommonAggregation(),
+      ]);
+
+      const chatPayload = chatData[0];
+
+      // send chat event to both users
+      emitSocketEvent(
+        req,
+        followerId.toString(),
+        socketEvents.chat_created,
+        chatPayload
+      );
+      emitSocketEvent(
+        req,
+        targetUserId.toString(),
+        socketEvents.chat_created,
+        chatPayload
+      );
+    }
+  }
+
   res.status(200).json({
     status: "success",
     data: {
@@ -118,7 +241,7 @@ export const getUserFollowers = catchAsync(async (req, res, next) => {
   });
 });
 
-// un follow particular user
+// unfollow particular user
 export const unfollowUser = catchAsync(async (req, res, next) => {
   const followerId = req.user._id;
   const targetUserId = req.params.userId;
@@ -152,6 +275,62 @@ export const unfollowUser = catchAsync(async (req, res, next) => {
   });
 
   emitSocketEvent(req, targetUserId, socketEvents.unfollow, notification);
+
+  // check that both have a mututal relationship
+  const mututalRelationShip = await Follow.find({
+    follower: followerId,
+    following: new mongoose.Types.ObjectId(targetUserId),
+  });
+  if (mututalRelationShip) {
+    // find the chat
+    const chat = await ChatModel.findOne({
+      users: { $all: [followerId, new mongoose.Types.ObjectId(targetUserId)] },
+    });
+
+    // if chat is found, disable it
+    if (chat) {
+      chat.status = "disabled";
+      await chat.save();
+
+      const aggregatedChat = await ChatModel.aggregate([
+        {
+          $match: {
+            users: {
+              $all: [followerId, new mongoose.Types.ObjectId(targetUserId)],
+            },
+          },
+        },
+        {
+          $addFields: {
+            users: {
+              $filter: {
+                input: "$users",
+                as: "users",
+                cond: { $ne: ["$$users", followerId] },
+              },
+            },
+          },
+        },
+        ...chatCommonAggregation(),
+      ]);
+
+      const populatedChat = aggregatedChat[0];
+
+      // send deleted chat to both user
+      emitSocketEvent(
+        req,
+        followerId.toString(),
+        socketEvents.chat_deleted,
+        populatedChat
+      );
+      emitSocketEvent(
+        req,
+        targetUserId.toString(),
+        socketEvents.chat_deleted,
+        populatedChat
+      );
+    }
+  }
 
   res.status(200).json({
     status: "success",

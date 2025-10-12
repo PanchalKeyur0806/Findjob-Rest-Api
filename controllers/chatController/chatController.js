@@ -5,7 +5,7 @@ import User from "../../models/userModel.js";
 import AppError from "../../utils/AppError.js";
 import { catchAsync } from "../../utils/catchAsync.js";
 
-const chatCommonAggregation = () => {
+export const chatCommonAggregation = () => {
   return [
     {
       $lookup: {
@@ -92,5 +92,34 @@ export const createChat = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     payload,
+  });
+});
+
+// list all users chat
+export const getAllUserChats = catchAsync(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const findChats = await ChatModel.aggregate([
+    {
+      $match: { users: { $elemMatch: { $eq: userId } } },
+    },
+    {
+      $addFields: {
+        users: {
+          $filter: {
+            input: "$users",
+            as: "users",
+            cond: { $ne: ["$$users", userId] },
+          },
+        },
+      },
+    },
+    ...chatCommonAggregation(),
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    message: "all chats found",
+    data: findChats,
   });
 });
