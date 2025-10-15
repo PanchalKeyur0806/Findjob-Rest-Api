@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose, { mongo, Types } from "mongoose";
 import Follow from "../../models/chatModel/followModel.js";
 import { Notification } from "../../models/notificationModel.js";
 import User from "../../models/userModel.js";
@@ -132,17 +132,6 @@ export const followUser = catchAsync(async (req, res, next) => {
             },
           },
         },
-        {
-          $addFields: {
-            users: {
-              $filter: {
-                input: "$users",
-                as: "users",
-                cond: { $ne: ["$$users", followerId] },
-              },
-            },
-          },
-        },
         ...chatCommonAggregation(),
       ]);
 
@@ -166,7 +155,10 @@ export const followUser = catchAsync(async (req, res, next) => {
     if (!payload) {
       // create the chat
       const newChat = await ChatModel.create({
-        users: [followerId, targetUserId],
+        users: [
+          new mongoose.Types.ObjectId(followerId),
+          new mongoose.Types.ObjectId(targetUserId),
+        ],
       });
       if (!newChat)
         return next(
@@ -176,17 +168,6 @@ export const followUser = catchAsync(async (req, res, next) => {
       const chatData = await ChatModel.aggregate([
         {
           $match: { _id: newChat._id },
-        },
-        {
-          $addFields: {
-            users: {
-              $filter: {
-                input: "$users",
-                as: "users",
-                cond: { $ne: ["$$users", followerId] },
-              },
-            },
-          },
         },
         ...chatCommonAggregation(),
       ]);
@@ -297,17 +278,6 @@ export const unfollowUser = catchAsync(async (req, res, next) => {
           $match: {
             users: {
               $all: [followerId, new mongoose.Types.ObjectId(targetUserId)],
-            },
-          },
-        },
-        {
-          $addFields: {
-            users: {
-              $filter: {
-                input: "$users",
-                as: "users",
-                cond: { $ne: ["$$users", followerId] },
-              },
             },
           },
         },

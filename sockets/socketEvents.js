@@ -29,6 +29,9 @@ export const socketEvents = {
   chat_updated: "chat_updated",
   chat_deleted: "chat_deleted",
 
+  // message event
+  message_received: "message_received",
+
   // ADMIN CONNECT EVENT
   admin_connected: "admin_connected",
   admin_disconnected: "admin_disconnected",

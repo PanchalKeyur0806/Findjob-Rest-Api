@@ -28,6 +28,33 @@ export const chatCommonAggregation = () => {
         ],
       },
     },
+    {
+      $lookup: {
+        from: "messagemodels",
+        foreignField: "_id",
+        localField: "latestMessage",
+        as: "latestMessage",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              foreignField: "_id",
+              localField: "sender",
+              as: "sender",
+              pipeline: [
+                {
+                  $project: {
+                    name: 1,
+                    email: 1,
+                    dateOfBirth: 1,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
   ];
 };
 
@@ -102,17 +129,6 @@ export const getAllUserChats = catchAsync(async (req, res, next) => {
   const findChats = await ChatModel.aggregate([
     {
       $match: { users: { $elemMatch: { $eq: userId } } },
-    },
-    {
-      $addFields: {
-        users: {
-          $filter: {
-            input: "$users",
-            as: "users",
-            cond: { $ne: ["$$users", userId] },
-          },
-        },
-      },
     },
     ...chatCommonAggregation(),
   ]);
