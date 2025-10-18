@@ -7,6 +7,6 @@ mongoose
   .then(() => console.log("DB Connected"))
   .catch((error) => console.log("Error occured ", error));
 
-httpServer.listen(process.env.PORT, () =>
-  console.log("server is running on port ", process.env.PORT)
+httpServer.listen(process.env.PORT, "0.0.0.0", () =>
+  console.log("server is running on http://`0.0.0.0`:" + process.env.PORT)
 );

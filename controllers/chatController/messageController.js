@@ -100,11 +100,21 @@ export const getAllMessages = catchAsync(async (req, res, next) => {
   if (!selectedChat.users.includes(userId))
     return next(new AppError("You are not part of this group", 400));
 
+  // find the opp user Id
+  const oppUserId = selectedChat.users.find(
+    (usr) => usr.toString() !== userId.toString()
+  );
+
   const messages = await MessageModel.aggregate([
     {
       $match: { chat: new mongoose.Types.ObjectId(chatId) },
     },
     ...chatMessageCommonAggregation(),
+    {
+      $addFields: {
+        isRead: { $in: [oppUserId, "$readBy"] },
+      },
+    },
     {
       $sort: { createdAt: 1 },
     },
@@ -114,5 +124,45 @@ export const getAllMessages = catchAsync(async (req, res, next) => {
     status: "success",
     message: "messages found",
     messages,
+  });
+});
+
+// read all the messages
+export const readMsg = catchAsync(async (req, res, next) => {
+  const { chatId } = req.params;
+  const userId = req.user._id;
+  let targetUserId;
+
+  // find the chat
+  const findChat = await ChatModel.findById(chatId);
+  if (findChat) {
+    targetUserId = findChat.users.find(
+      (usr) => usr.toString() !== userId.toString()
+    );
+  }
+
+  // update all the messages that are not sent by current User
+  await MessageModel.updateMany(
+    {
+      chat: chatId,
+      sender: { $ne: userId },
+      readBy: { $ne: userId },
+    },
+    {
+      $addToSet: { readBy: userId },
+    }
+  );
+
+  // emit socket event
+  emitSocketEvent(req, targetUserId.toString(), socketEvents.message_read, {
+    chatId,
+    userId,
+    targetUserId,
+  });
+
+  // send response
+  res.status(200).json({
+    status: "success",
+    message: "message read successfully",
   });
 });
