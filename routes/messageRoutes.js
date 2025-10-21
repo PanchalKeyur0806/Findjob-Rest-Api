@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  deleteMsgs,
   getAllMessages,
   readMsg,
   sendMessage,
@@ -11,5 +12,6 @@ const routes = Router();
 routes.use(protect);
 routes.route("/:chatId").get(getAllMessages).post(sendMessage);
 routes.patch("/:chatId/read", readMsg);
+routes.route("/:chatId/:messageId").delete(deleteMsgs);
 
 export default routes;

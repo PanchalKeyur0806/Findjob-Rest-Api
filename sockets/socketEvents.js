@@ -32,6 +32,7 @@ export const socketEvents = {
   // message event
   message_received: "message_received",
   message_read: "message_read",
+  message_deleted: "message_deleted",
 
   // ADMIN CONNECT EVENT
   admin_connected: "admin_connected",

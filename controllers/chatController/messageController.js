@@ -88,7 +88,6 @@ export const sendMessage = catchAsync(async (req, res, next) => {
 });
 
 // get all messages
-
 export const getAllMessages = catchAsync(async (req, res, next) => {
   const { chatId } = req.params;
   const userId = req.user._id;
@@ -164,5 +163,55 @@ export const readMsg = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     message: "message read successfully",
+  });
+});
+
+// delete messages
+export const deleteMsgs = catchAsync(async (req, res, next) => {
+  const { chatId, messageId } = req.params;
+  const userId = req.user._id;
+
+  // find the chat
+  const findChat = await ChatModel.findById(chatId);
+  if (!findChat) return next(new AppError("Chat not found", 404));
+
+  // find all the messages
+  const message = await MessageModel.findById(messageId);
+  if (!message) return next(new AppError("Messages not found", 404));
+
+  // check the sender of the msg
+  if (message.sender.toString() !== userId.toString())
+    return next(
+      new AppError("You are not allowed to perform this action", 403)
+    );
+
+  // delete the msg from the DB
+  await MessageModel.findByIdAndDelete(messageId);
+
+  // if deleted msg was the last msg
+  if (findChat.latestMessage.toString() === message._id.toString()) {
+    const lastMsg = await MessageModel.findOne({ chat: chatId })
+      .sort({
+        createdAt: -1,
+      })
+      .limit(1);
+
+    await ChatModel.findByIdAndUpdate(chatId, {
+      latestMessage: lastMsg ? lastMsg._id : null,
+    });
+  }
+
+  // emit socket event to each user
+  findChat.users.forEach((usr) => {
+    if (usr.toString() === userId.toString()) return;
+
+    emitSocketEvent(req, usr.toString(), socketEvents.message_deleted, message);
+  });
+
+  // send the response
+  res.status(200).json({
+    status: "success",
+    message: "Message deleted successfully",
+    data: message,
   });
 });
